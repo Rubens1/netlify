@@ -106,6 +106,7 @@
   ],
   "devDependencies": {
     "@automattic/webpack-rtl-plugin": "^6.0.0",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "css-loader": "^6.7.3",
     "eslint": "^8.41.0",
