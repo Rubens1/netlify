@@ -4,9 +4,6 @@ import MainLayout from '../layouts/MainLayout';
 import ErrorLayout from '../layouts/ErrorLayout';
 import Landing from 'components/pages/landing/Landing';
 
-import EmailDetail from 'components/app/email/email-detail/EmailDetail';
-import Inbox from 'components/app/email/inbox/Inbox';
-
 import Error404 from 'components/errors/Error404';
 import Error500 from 'components/errors/Error500';
 
@@ -40,7 +37,7 @@ import CadastraCliente from 'components/clientes/CadastrarCliente';
 import CadastrarEndereco from 'components/clientes/CadastrarEndereco';
 import { FormContext } from 'components/clientes/CadastrarCliente';
 import { tree } from 'd3';
-
+import axios from 'axios';
 const FalconRoutes = () => {
   const [token, setToken] = useState(false)
   const [userId, setUserId] = useState(false)
@@ -55,11 +52,27 @@ const FalconRoutes = () => {
     if (!isAuthenticated) {
       setToken(true)
     }
-
-    console.log(userId);
+    refreshToken()
 
   }, [])
+  
 
+  const refreshToken = async () => {
+    if (localStorage.getItem("tokenUser")) {
+      console.log(localStorage.getItem("tokenUser"))
+      setInterval(() => {
+        axios.put(`${process.env.REACT_APP_API_URL}pessoa-atualizar`, {}, {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem('tokenUser')}`
+          }
+        }).then(response => {
+          localStorage.setItem("tokenUser", response.data)
+        })
+
+
+      }, 1000 * 60 * 60 * 2) //Duas Horas
+    }
+  }
   return (
     <Routes>
       <Route path="landing" element={<Landing />} />

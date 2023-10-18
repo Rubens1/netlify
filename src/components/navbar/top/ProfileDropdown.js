@@ -10,7 +10,7 @@ const ProfileDropdown = () => {
 
   
   const logout = async (e) => {
-    let token = localStorage.getItem('tokenUser').replace(/"/g, '');
+    let token = localStorage.getItem('tokenUser');
   
     axios.post(`${process.env.REACT_APP_API_URL}pessoa-logout`, {}, {
       headers: {

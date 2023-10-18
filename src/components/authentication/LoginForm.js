@@ -41,7 +41,7 @@ const LoginForm = ({ hasLabel, layout }) => {
     }).then((response) => {
       console.log(response);
       const token = JSON.stringify(response.data.authorization.token);
-      localStorage.setItem('tokenUser', token);
+      localStorage.setItem('tokenUser', token.replace(/"/g, ''));
       window.location.href = window.location.protocol + "//" + window.location.host;
     }).catch(error => {
       console.log(error);

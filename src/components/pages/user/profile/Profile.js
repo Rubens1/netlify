@@ -21,7 +21,7 @@ const Profile = () => {
   const profileData = async () => {
     const res = await fetch(`${process.env.REACT_APP_API_URL}pessoa-perfil`, {
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem('tokenUser').replace(/"/g, '')}`
+        "Authorization": `Bearer ${localStorage.getItem('tokenUser')}`
       }
     })
 
