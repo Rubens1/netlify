@@ -6,9 +6,12 @@ import avatar from 'assets/img/team/avatar.png';
 import { toast } from 'react-toastify';
 import Avatar from 'components/common/Avatar';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 const ProfileDropdown = () => {
 
-  
+  const navigate = useNavigate();
+
   const logout = async (e) => {
     let token = localStorage.getItem('tokenUser');
   
@@ -23,14 +26,10 @@ const ProfileDropdown = () => {
         theme: 'colored',
         position: "top-right"
       });
-      window.location.href = window.location.protocol + "//" + window.location.host;
+      navigate("/login")
     }).catch(error => {
-      toast.error('Erro ao tentar sair', {
-        theme: 'colored',
-        position: "top-right"
-      });
       localStorage.removeItem("tokenUser");
-      window.location.href = window.location.protocol + "//" + window.location.host;
+      navigate("/login")
     });
   }
 

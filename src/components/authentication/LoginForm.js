@@ -5,13 +5,15 @@ import { Button, Col, Form, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const LoginForm = ({ hasLabel, layout }) => {
   // State
-
+  const navigate = useNavigate();
   useEffect(()=>{
-    const isAuthenticated = localStorage.getItem("tokenUser");
-    if(isAuthenticated){
-      window.location.href = window.location.protocol + "//" + window.location.host;
+    let token = localStorage.getItem('tokenUser');
+
+    if(token){
+      navigate("/")
     }
     if(localStorage.getItem("emailStorage") && localStorage.getItem("senhaStorage")){
       formData.email = localStorage.getItem("emailStorage");
@@ -42,7 +44,7 @@ const LoginForm = ({ hasLabel, layout }) => {
       console.log(response);
       const token = JSON.stringify(response.data.authorization.token);
       localStorage.setItem('tokenUser', token.replace(/"/g, ''));
-      window.location.href = window.location.protocol + "//" + window.location.host;
+      navigate("/")
     }).catch(error => {
       console.log(error);
       toast.error(error.response.data.error, {
