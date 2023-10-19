@@ -7,10 +7,9 @@ import { BiEdit } from 'react-icons/bi';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { Button, Table, Modal, Form } from 'react-bootstrap';
 import PageHeader from 'components/common/PageHeader';
+import { toast } from 'react-toastify';
 
 const CategoriaInfo = () => {
-    const [filteredClient, setFilteredCliente] = useState([]);
-    const [search, setSearch] = useState();
     const [currentPage, setCurrentPage] = useState(1);
     const [links, setLinks] = useState();
     const [link, setLink] = useState(process.env.REACT_APP_API_URL + "categorias?page=1");
@@ -19,7 +18,9 @@ const CategoriaInfo = () => {
     const [deletaCategoria, setDeletaCategoria] = useState(false);
     const [editCategoria, setEditCategoria] = useState()
 
-    console.log(link)
+    const [deleteShow, setDeleteShow] = useState();
+    const [preDeleteData, setPreDeleteData] = useState();
+
     useEffect(() => {
         axios.get(link ?? process.env.REACT_APP_API_URL + "categorias?page=1", {
         })
@@ -35,7 +36,10 @@ const CategoriaInfo = () => {
 
     }, [link])
 
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setShow(false)
+        setDeleteShow(false)
+    };
 
     const handleShow = (e) => {
         setShow(true)
@@ -48,29 +52,55 @@ const CategoriaInfo = () => {
             })
     };
 
+    const editar = async (e) => {
+        e.preventDefault();
+        
+        let id = e.target.id.value;
+        const article = { categoria: e.target.categoria.value, categoria_pai: e.target.categoria_pai.value, keywords: e.target.keywords.value, descricao: e.target.descricao.value, status: e.target.status.value};
+
+        axios.put(`${process.env.REACT_APP_API_URL}editar-categoria/${id}`, article)
+            .then((response) => {
+                toast.success('Categoria Atualizado com sucesso', {
+                    theme: 'colored',
+                    position: "top-right"
+                  });
+                  axios.get(`${process.env.REACT_APP_API_URL}categorias`)
+                  .then((response) => {
+                      setCategoria(response.data.data)
+                      setDeletaCategoria(false)
+                  })
+            }).catch((error) => {
+                toast.success('Erro ao editar os dados', {
+                    theme: 'colored',
+                    position: "top-right"
+                  });
+            });
+    }
+
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}categorias`)
             .then((response) => {
                 setCategoria(response.data.data)
                 setDeletaCategoria(false)
             })
+
     }, [deletaCategoria])
 
-    const editar = async (e) => {
-        e.preventDefault();
-        let categoria = e.target.categoria.value;
-        let categoria_pai = e.target.categoria_pai.value;
-        let keywords = e.target.keywords.value;
-        let descricao = e.target.descricao.value;
-        let status = e.target.status.value;
+   
+
+    const handleItemDelete = (item) => {
+        setPreDeleteData(item)
+        setDeleteShow(true);
+        setShow(false)
     }
 
     const excluirCategoria = async (e) => {
-        axios.delete(`${process.env.REACT_APP_API_URL}excluir-categoria/${e}`, {
+        axios.delete(`${process.env.REACT_APP_API_URL}excluir-categoria/${preDeleteData.id}`, {
             'id': e
         })
             .then((response) => {
-                console.log(response.data)
+                setShow(false)
+                setDeleteShow(false)
                 setDeletaCategoria(true)
             })
     }
@@ -98,7 +128,7 @@ const CategoriaInfo = () => {
                                     <td className="text-nowrap">{item.ativo ? 'Ativo' : 'Desativado'}</td>
                                     <td className="text-nowrap">
                                         <Button onClick={() => handleShow(item.id)} className='btn btn-success'><BiEdit /></Button>
-                                        <Button onClick={() => excluirCategoria(item.id)} className='btn btn-danger ms-3'><AiOutlineDelete /></Button>
+                                        <Button onClick={() => handleItemDelete(item)} className='btn btn-danger ms-3'><AiOutlineDelete /></Button>
                                     </td>
                                 </tr>
                             )}
@@ -184,6 +214,8 @@ const CategoriaInfo = () => {
                                             <Form.Label>Descrição do SEO</Form.Label>
                                             <Form.Control name="descricao" as="textarea" placeholder="Digita a descrição do SEO" defaultValue={item.descricao} rows="5" type="text" />
                                         </Form.Group>
+                                        <Form.Control type="hidden" name="id" defaultValue={item.id} />
+
                                         <Form.Group className="mb-3">
                                             <Button variant="primary" type="submit" className="px-4 mx-0" >Editar</Button>
                                         </Form.Group>
@@ -194,6 +226,20 @@ const CategoriaInfo = () => {
                         </Form>
                     </Modal.Body>
 
+                </Modal>
+                {/**Exlcuir */}
+                <Modal show={deleteShow} onHide={handleClose}>
+                    <Modal.Header closeButton>
+                    </Modal.Header>
+                    <Modal.Body><h5>Tem certeza que você quer excluir a categoria {preDeleteData ? preDeleteData.categoria : ""}</h5></Modal.Body>
+                    <Modal.Footer className='d-flex justify-content-center'>
+                        <Button className="btn-success" variant="primary" onClick={e => excluirCategoria(preDeleteData ? preDeleteData.id : "")}>
+                            CONFIRMAR
+                        </Button>
+                        <Button className="btn-danger" onClick={handleClose}>
+                            CANCELAR
+                        </Button>
+                    </Modal.Footer>
                 </Modal>
             </FalconComponentCard >
 

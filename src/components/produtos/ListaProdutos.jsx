@@ -134,9 +134,8 @@ const ListaProdutos = () => {
         {/**Exlcuir */}
         <Modal show={deleteShow} onHide={handleClose}>
           <Modal.Header closeButton>
-            <Modal.Title>Tem certeza que você quer excluir esse produto?</Modal.Title>
           </Modal.Header>
-          <Modal.Body>O produto é: {preDeleteData ? preDeleteData.nome : ""} </Modal.Body>
+          <Modal.Body><h5>Tem certeza que você quer excluir o produto {preDeleteData ? preDeleteData.nome : ""}</h5></Modal.Body>
           <Modal.Footer className='d-flex justify-content-center'>
             <Button className="btn-success" variant="primary" onClick={e => deleteItem(preDeleteData ? preDeleteData.id : "")}>
               CONFIRMAR

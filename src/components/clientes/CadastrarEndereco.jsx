@@ -18,8 +18,6 @@ const CadastrarEndereco = ({ props }) => {
         ...pessoa_id
     }));
 
-    console.log(dadosFormulario);
-
     useEffect(() => {
         const cep = document.getElementById("cep");
 
@@ -52,10 +50,8 @@ const CadastrarEndereco = ({ props }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post(`${process.env.REACT_APP_API_URL}cadastrar-endereco-cliente`, dadosFormulario)
+        axios.post(`${process.env.REACT_APP_API_URL}cadastrar-endereco`, dadosFormulario)
             .then(response => {
-                console.log(response);
-
                 toast.success("Endereço criado com suscesso", {
                     theme: 'colored',
                     position: "top-right"

@@ -9,7 +9,7 @@ import Error500 from 'components/errors/Error500';
 
 import Dashboard from 'components/dashboards/default';
 
-import ListaProdutos from 'components/produtos/lista';
+import ListaProdutos from 'components/produtos/ListaProdutos';
 import CadastrarProduto from 'components/produtos/CadastrarProduto';
 import LoginPainel from 'login';
 import Kanban from 'components/app/kanban/Kanban';

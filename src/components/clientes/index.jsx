@@ -93,6 +93,7 @@ const ClientesInfo = () => {
                                     <th scope="col">Nome</th>
                                     <th scope="col">cpf/cnpj</th>
                                     <th scope="col">Pedidos</th>
+                                    <th scope="col">Ação</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -110,9 +111,7 @@ const ClientesInfo = () => {
                                             <Button onClick={() => {handleEditClieteModal(item.id)}}>
                                                 <BiEdit />
                                             </Button>
-                                            <Button onClick={() => alert("delete")} className='btn btn-danger ms-3 text-nowrap'>
-                                                <AiOutlineDelete />
-                                            </Button></td>
+                                        </td>
                                     </tr>
                                 ) : <></>
 
