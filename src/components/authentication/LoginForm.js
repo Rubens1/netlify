@@ -41,9 +41,12 @@ const LoginForm = ({ hasLabel, layout }) => {
       email: email,
       senha: senha
     }).then((response) => {
-      console.log(response);
       const token = JSON.stringify(response.data.authorization.token);
       localStorage.setItem('tokenUser', token.replace(/"/g, ''));
+      toast.success(`Usuário conectado com sucesso`, {
+        theme: 'colored',
+        position: "top-right"
+      });
       navigate("/")
     }).catch(error => {
       console.log(error);

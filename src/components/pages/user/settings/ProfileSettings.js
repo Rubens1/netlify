@@ -7,8 +7,6 @@ const ProfileSettings = ({ ...props }) => {
 
   const { formData } = props;
 
-  console.log(formData);
-  
   const handleSubmit = (e) => {
 
   }
@@ -27,81 +25,35 @@ const ProfileSettings = ({ ...props }) => {
               <Form.Control
                 type="text"
                 id="nome"
-                placeholder="Nome completo"
+                placeholder="Digita o seu nome completo"
                 defaultValue={formData.nome}
                 name="nome"
-                onChange={handleChange}
               />
             </Form.Group>
 
-            <Form.Group as={Col} lg={6} >
-              <Form.Label>Apelido</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Apelido"
-                defaultValue={formData.alias}
-                name="alias"
-                onChange={handleChange}
-              />
-            </Form.Group>
-          </Row>
-          <Row className="mb-3 g-3">
             <Form.Group as={Col} lg={6} >
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
-                placeholder="Email"
+                placeholder="Digita o email"
                 defaultValue={formData.email}
-                name="email"
-                onChange={handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group as={Col} lg={6} >
-              <Form.Label>Celular</Form.Label>
-              <Form.Control
-                as={IMaskInput}
-                mask="(00) 0 0000-000"
-                type="tel"
-                placeholder="telfone"
-                value={formData.celular}
-                name="celular"
-                onChange={handleChange}
+                name="alias"
               />
             </Form.Group>
           </Row>
-          <Row className="mb-3 g-3">
-            <Form.Group as={Col} lg={6}>
-              <Form.Label>Telefone fixo</Form.Label>
-              <Form.Control
-                as={IMaskInput}
-                mask="(00) 0000-0000"
-                type="tel"
-                placeholder="Telefone fixo"
-                defaultValue={formData.telefone}
-                name="email"
-                onChange={handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group as={Col} lg={6}>
-              <Form.Label>Celular</Form.Label>
-              <Form.Control
-                as={IMaskInput}
-                mask="(00) 0 0000-000"
-                type="tel"
-                placeholder="Phone"
-                value={formData.celular}
-                name="celular"
-                onChange={handleChange}
-              />
-            </Form.Group>
-          </Row>
-          <div className="text-end">
-            <Button variant="primary" type="submit">
-              Update
+          
+          <Row>
+            <Col className="text-start">
+            <Button variant="success" type="submit">
+              Editar Senha
             </Button>
-          </div>
+            </Col>
+          <Col className="text-end">
+            <Button variant="primary" type="submit">
+              Editar
+            </Button>
+          </Col>
+          </Row>
         </Form>
       </Card.Body>
     </Card>

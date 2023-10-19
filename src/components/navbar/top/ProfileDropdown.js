@@ -15,7 +15,7 @@ const ProfileDropdown = () => {
   const logout = async (e) => {
     let token = localStorage.getItem('tokenUser');
   
-    axios.post(`${process.env.REACT_APP_API_URL}pessoa-logout`, {}, {
+    axios.post(`${process.env.REACT_APP_API_URL}pessoa-sair`, {}, {
       headers: {
         'Authorization': `Bearer ${token}`
       },
