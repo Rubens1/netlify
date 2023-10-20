@@ -39,7 +39,7 @@ const App = () => {
   }, [navbarPosition]);
 
   return (
-    <Router basename="/">
+    <Router>
       <FalconRoutes />
       <SettingsToggle />
       <SettingsPanel />
