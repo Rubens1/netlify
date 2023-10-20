@@ -39,7 +39,7 @@ const App = () => {
   }, [navbarPosition]);
 
   return (
-    <Router basename={process.env.PUBLIC_URL}>
+    <Router basename="/">
       <FalconRoutes />
       <SettingsToggle />
       <SettingsPanel />
