@@ -4,12 +4,15 @@ import MainLayout from '../layouts/MainLayout';
 import ErrorLayout from '../layouts/ErrorLayout';
 import Landing from 'components/pages/landing/Landing';
 
+import EmailDetail from 'components/app/email/email-detail/EmailDetail';
+import Inbox from 'components/app/email/inbox/Inbox';
+
 import Error404 from 'components/errors/Error404';
 import Error500 from 'components/errors/Error500';
 
 import Dashboard from 'components/dashboards/default';
 
-import ListaProdutos from 'components/produtos/ListaProdutos';
+import ListaProdutos from 'components/produtos/lista';
 import CadastrarProduto from 'components/produtos/CadastrarProduto';
 import LoginPainel from 'login';
 import Kanban from 'components/app/kanban/Kanban';
@@ -35,31 +38,14 @@ import PedidosInfo from 'components/pedidos/lista';
 import CadastrarPedido from 'components/pedidos/cadastrar';
 import CadastraCliente from 'components/clientes/CadastrarCliente';
 import CadastrarEndereco from 'components/clientes/CadastrarEndereco';
-import { FormContext } from 'components/clientes/CadastrarCliente';
-import { tree } from 'd3';
 import axios from 'axios';
+
 const FalconRoutes = () => {
   const [token, setToken] = useState(false)
   const [userId, setUserId] = useState(false)
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem("tokenUser");
-    const id = localStorage.getItem("user_id");
-
-    if (id) {
-      setUserId(true);
-    }
-    if (!isAuthenticated) {
-      setToken(true)
-    }
-    refreshToken()
-
-  }, [])
-  
-
   const refreshToken = async () => {
     if (localStorage.getItem("tokenUser")) {
-      console.log(localStorage.getItem("tokenUser"))
       setInterval(() => {
         axios.put(`${process.env.REACT_APP_API_URL}pessoa-atualizar`, {}, {
           headers: {
@@ -73,6 +59,22 @@ const FalconRoutes = () => {
       }, 1000 * 60 * 60 * 2) //Duas Horas
     }
   }
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("tokenUser");
+    const id = localStorage.getItem("user_id");
+
+    refreshToken()
+
+    if (id) {
+      setUserId(true);
+    }
+    if (!isAuthenticated) {
+      setToken(true)
+    }
+
+  }, [])
+
   return (
     <Routes>
       <Route path="landing" element={<Landing />} />

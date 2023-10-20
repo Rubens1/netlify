@@ -1,20 +1,15 @@
-import { ApolloClient, InMemoryCache, gql, useQuery } from '@apollo/client';
+import axios from "axios";
 
-export const client = new ApolloClient({
-    uri: process.env.REACT_APP_API_URL,
-    cache: new InMemoryCache(),
-});
+const token = localStorage.getItem("tokenUser");
+let headers = {};
 
-
-export const inicial = async () => {
-    
-    client.query({
-        query: gql`
-        query {
-            lista {
-                celular
-                codigo
-            }
-        }`
-    }).then(res => console.log(res))
+if (token) {
+    headers = {
+        "Authorization": `Bearer ${token}`
+    }
 }
+
+export const api = axios.create({
+    baseURL: `${process.env.REACT_APP_API_URL}`,
+    headers : headers
+});

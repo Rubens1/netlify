@@ -89,20 +89,20 @@ const CadastraCliente = () => {
                     <Form.Group>
                         <Row>
                             <Col xs={6}>
-                                <Form.Select id="tipo_cadastro" onChange={handleChange} aria-label="Tipo de cadastro" onClick={(e) => clickTipo(e.target)}>
+                                <Form.Select id="tipo" onChange={handleChange} aria-label="Tipo de cadastro" onClick={(e) => clickTipo(e.target)}>
                                     <option value="" >
                                         Selecione o tipo de cadastro
 
                                     </option>
-                                    <option value="cpf">CPF</option>
-                                    <option value="cnpj">CNPJ</option>
+                                    <option value="PF">CPF</option>
+                                    <option value="PJ">CNPJ</option>
                                 </Form.Select>
                             </Col>
                             <Col xs={6}>
                                 <Form.Group
                                     className="mb-3"
                                 >
-                                    {tipoDeCadastro == "cpf" &&
+                                    {tipoDeCadastro == "PF" &&
                                         <Form.Control
                                             onChange={handleChange}
                                             as={IMaskInput}
@@ -113,7 +113,7 @@ const CadastraCliente = () => {
                                             placeholder='Digite o cpf'
                                         />
                                     }
-                                    {tipoDeCadastro == "cnpj" &&
+                                    {tipoDeCadastro == "PJ" &&
                                         <Form.Control
                                             onChange={handleChange}
                                             as={IMaskInput}
@@ -144,7 +144,7 @@ const CadastraCliente = () => {
 
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        {tipoDeCadastro == "cnpj" &&
+                        {tipoDeCadastro == "PJ" &&
                             <>
                                 <Form.Label>Razão social</Form.Label>
                                 <Form.Control

@@ -6,30 +6,32 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+
 const LoginForm = ({ hasLabel, layout }) => {
-  // State
   const navigate = useNavigate();
-  useEffect(()=>{
+
+  useEffect(() => {
     let token = localStorage.getItem('tokenUser');
 
-    if(token){
+    if (token) {
       navigate("/")
     }
-    if(localStorage.getItem("emailStorage") && localStorage.getItem("senhaStorage")){
+
+    if (localStorage.getItem("emailStorage") && localStorage.getItem("senhaStorage")) {
       formData.email = localStorage.getItem("emailStorage");
       formData.senha = localStorage.getItem("senhaStorage");
       formData.remember = true;
-    }else{
+    } else {
       formData.remember = false;
     }
-    
-  },[])
+
+  }, [])
 
   const [formData, setFormData] = useState({
     email: '',
     senha: '',
     remember: false
-  });      
+  });
 
   // Handler
   const handleSubmit = async (e) => {
@@ -42,20 +44,17 @@ const LoginForm = ({ hasLabel, layout }) => {
       senha: senha
     }).then((response) => {
       const token = JSON.stringify(response.data.authorization.token);
+
       localStorage.setItem('tokenUser', token.replace(/"/g, ''));
-      toast.success(`Usuário conectado com sucesso`, {
-        theme: 'colored',
-        position: "top-right"
-      });
+      
       navigate("/")
+
     }).catch(error => {
-      console.log(error);
       toast.error(error.response.data.error, {
         theme: 'colored',
         position: "top-right"
       });
     }).catch(error => {
-      console.log(error);
       toast.error('Erro na conexão com o servidor', {
         theme: 'colored',
         position: "top-right"
@@ -72,15 +71,15 @@ const LoginForm = ({ hasLabel, layout }) => {
   };
 
   const lembrete = (e) => {
-    if(formData.remember == false){
+    if (formData.remember == false) {
       localStorage.setItem('emailStorage', formData.email);
       localStorage.setItem('senhaStorage', formData.senha);
       formData.remember = true;
-    }else{
+    } else {
       localStorage.removeItem("emailStorage");
       localStorage.removeItem("senhaStorage");
       formData.remember = false;
-    }  
+    }
   }
   return (
     <Form onSubmit={handleSubmit}>

@@ -7,22 +7,22 @@ import { BiEdit } from 'react-icons/bi';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { Button, Table, Modal, Form } from 'react-bootstrap';
 import PageHeader from 'components/common/PageHeader';
-import { toast } from 'react-toastify';
+import { api } from "api/api";
+import { toast } from "react-toastify";
 
 const CategoriaInfo = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [links, setLinks] = useState();
-    const [link, setLink] = useState(process.env.REACT_APP_API_URL + "categorias?page=1");
+    const [link, setLink] = useState("categorias?page=1");
     const [categoria, setCategoria] = useState();
     const [show, setShow] = useState(false);
     const [deletaCategoria, setDeletaCategoria] = useState(false);
     const [editCategoria, setEditCategoria] = useState()
-
     const [deleteShow, setDeleteShow] = useState();
     const [preDeleteData, setPreDeleteData] = useState();
 
     useEffect(() => {
-        axios.get(link ?? process.env.REACT_APP_API_URL + "categorias?page=1", {
+        api.get(link ?? "categorias?page=1", {
         })
             .then(response => {
                 setCategoria(response.data.data);
@@ -52,31 +52,6 @@ const CategoriaInfo = () => {
             })
     };
 
-    const editar = async (e) => {
-        e.preventDefault();
-        
-        let id = e.target.id.value;
-        const article = { categoria: e.target.categoria.value, categoria_pai: e.target.categoria_pai.value, keywords: e.target.keywords.value, descricao: e.target.descricao.value, status: e.target.status.value};
-
-        axios.put(`${process.env.REACT_APP_API_URL}editar-categoria/${id}`, article)
-            .then((response) => {
-                toast.success('Categoria Atualizado com sucesso', {
-                    theme: 'colored',
-                    position: "top-right"
-                  });
-                  axios.get(`${process.env.REACT_APP_API_URL}categorias`)
-                  .then((response) => {
-                      setCategoria(response.data.data)
-                      setDeletaCategoria(false)
-                  })
-            }).catch((error) => {
-                toast.success('Erro ao editar os dados', {
-                    theme: 'colored',
-                    position: "top-right"
-                  });
-            });
-    }
-
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}categorias`)
             .then((response) => {
@@ -86,7 +61,39 @@ const CategoriaInfo = () => {
 
     }, [deletaCategoria])
 
-   
+    const editar = async (e) => {
+        e.preventDefault();
+
+        let id = e.target.id.value;
+
+        const article = {
+            categoria: e.target.categoria.value,
+            id_categoria: e.target.categoria_pai.value,
+            keywords: e.target.keywords.value,
+            descricao: e.target.descricao.value,
+            status: e.target.status.value
+        };
+
+        api.put(`editar-categoria/${id}`, article)
+            .then((response) => {
+                console.log(response)
+                toast.success('Categoria Atualizado com sucesso', {
+                    theme: 'colored',
+                    position: "top-right"
+                });
+                api.get(`categorias`)
+                    .then((response) => {
+                        setCategoria(response.data.data)
+                        setDeletaCategoria(false)
+                    })
+            }).catch((error) => {
+                console.log(error.response)
+                toast.success('Erro ao editar os dados', {
+                    theme: 'colored',
+                    position: "top-right"
+                });
+            });
+    }
 
     const handleItemDelete = (item) => {
         setPreDeleteData(item)
@@ -168,7 +175,8 @@ const CategoriaInfo = () => {
                                     item.ativo = 0
                                 }
                                 return (
-                                    <>
+                                    <div key={key}>
+                                        <Form.Control type="hidden" name="id" defaultValue={item.id} />
                                         <Form.Group key={key} className="mb-3">
                                             <Form.Label>Nome da Categoria</Form.Label>
                                             <Form.Control type="text" placeholder="Digita o nome da categoria" name="categoria" defaultValue={item.categoria} />
@@ -178,11 +186,13 @@ const CategoriaInfo = () => {
                                         <Form.Group className="mb-3 mt-3">
                                             <Form.Label>Categoria Pai</Form.Label>
                                             <Form.Select name="categoria_pai" defaultValue={item.idPai}>
-                                                {item.idPai ? (<option value={item.idPai}>{item.nome}</option>) : (<option value="null" >Selecione a Categoria Pai</option>)}
+                                                <option value={0} >Selecione a Categoria Pai</option>
+                                                {item.idPai ? (<option value={item.idPai}>{item.nome}</option>) : ''}
                                                 {categoria && categoria.map((item1) => {
                                                     if (item.idPai != item1.id) {
-                                                        return (
+                                                        return (<>
                                                             <option value={item1.id} >{item1.categoria}</option>
+                                                        </>
                                                         )
                                                     }
                                                 })}
@@ -214,12 +224,10 @@ const CategoriaInfo = () => {
                                             <Form.Label>Descrição do SEO</Form.Label>
                                             <Form.Control name="descricao" as="textarea" placeholder="Digita a descrição do SEO" defaultValue={item.descricao} rows="5" type="text" />
                                         </Form.Group>
-                                        <Form.Control type="hidden" name="id" defaultValue={item.id} />
-
                                         <Form.Group className="mb-3">
                                             <Button variant="primary" type="submit" className="px-4 mx-0" >Editar</Button>
                                         </Form.Group>
-                                    </>
+                                    </div>
                                 )
                             }) : (<></>)}
 
@@ -230,8 +238,9 @@ const CategoriaInfo = () => {
                 {/**Exlcuir */}
                 <Modal show={deleteShow} onHide={handleClose}>
                     <Modal.Header closeButton>
+                        <Modal.Title>Tem certeza que você quer excluir essa categoria?</Modal.Title>
                     </Modal.Header>
-                    <Modal.Body><h5>Tem certeza que você quer excluir a categoria {preDeleteData ? preDeleteData.categoria : ""}</h5></Modal.Body>
+                    <Modal.Body>Categoria é: {preDeleteData ? preDeleteData.categoria : ""} </Modal.Body>
                     <Modal.Footer className='d-flex justify-content-center'>
                         <Button className="btn-success" variant="primary" onClick={e => excluirCategoria(preDeleteData ? preDeleteData.id : "")}>
                             CONFIRMAR

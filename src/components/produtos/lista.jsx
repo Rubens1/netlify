@@ -13,14 +13,14 @@ import { toast } from 'react-toastify';
 const ListaProdutos = () => {
   const [produtos, setProdutos] = useState();
   const [links, setLinks] = useState();
-  const [currentPage, setCurrentPage] = useState("http://localhost:8000/api/produtos?page=1");
+  const [currentPage, setCurrentPage] = useState( process.env.REACT_APP_API_URL+"produtos?page=1");
   const [wasDeleteted, setWasDeleted] = useState(false);
   const [preDeleteData, setPreDeleteData] = useState();
   const [show, setShow] = useState(false);
   const [deleteShow, setDeleteShow] = useState(false);
   const [identifica, setIdentifica] = useState();
   const [totalPages, setTotalPages] = useState(null);
-
+  
   useEffect(() => {
     axios.get(currentPage, {
       headers: {

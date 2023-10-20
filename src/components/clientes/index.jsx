@@ -9,6 +9,11 @@ import FalconComponentCard from 'components/common/FalconComponentCard';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Card, Col, Row, Form, ButtonGroup, Button, Table, Modal } from 'react-bootstrap';
+import Nav from 'react-bootstrap/Nav';
+import { faUser, faHouseUser } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IMaskInput } from 'react-imask';
+import { api } from "api/api";
 
 const ClientesInfo = () => {
     const [clientes, setClientes] = useState();
@@ -20,14 +25,31 @@ const ClientesInfo = () => {
     const [link, setLink] = useState(process.env.REACT_APP_API_URL + "pessoas-lista-paginada?page=1")
     const [showEditClienteModal, setShowEditClienteModal] = useState(false);
     const [identifica, setIdentifica] = useState([])
-    const [tipoEdite, seTipoEdite] = useState('pessoal');
+    const [tipoEdite, setTipoEdite] = useState('pessoal');
+    const [clienteSelecionado, setclienteSelecionado] = useState();
+    const [listaDeEnderecos, setListaDeEnderecos] = useState();
+    const [enderecoId, setEnderecoId] = useState();
+    const [enderecoSelecionado, setEnderecoSelecionado] = useState();
+
     const navigate = useNavigate();
 
     useEffect(() => {
+        const id = Number(enderecoId);
+
+        if(enderecoId == null || !enderecoId) {
+            setEnderecoSelecionado(null)
+        }
+
+        if (Number.isInteger(id)) {
+            api.get(`endereco/${id}`)
+                .then((response) => {
+                    setEnderecoSelecionado(prevState => response.data)
+                })
+        }
+
         axios.get(`${link ?? process.env.REACT_APP_API_URL + "pessoas-lista-paginada?page=1"}`, {
         })
             .then(response => {
-                console.log(response.data)
                 setCurrentPage(response.data.current_page)
                 setClientes(response.data.data);
                 setLinks(response.data.links);
@@ -36,16 +58,38 @@ const ClientesInfo = () => {
 
         const search = document.getElementById("nome");
 
-    }, [link])
+    }, [link, enderecoId, enderecoSelecionado])
 
 
+    console.log(enderecoId);
+
+    const redirectToAddressForm = () => {
+        localStorage.setItem("user_id", clienteSelecionado.id);
+
+        navigate("/cadastrar-endereco")
+    }
+
+    const handleSubmit = () => {
+
+    }
+
+    const handleAddSubmit = () => {
+
+    }
+    const handleChange = () => {
+
+    }
     const handleClose = () => {
         setShow(false)
         setShowEditClienteModal(false)
+        setListaDeEnderecos('')
+        setTipoEdite('pessoal')
+        setEnderecoId(null)
     };
 
-    const handleEditClieteModal = async (e) => {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}pessoa/${e}`)
+    const handleEditClieteModal = async (item) => {
+        setclienteSelecionado(item);
+        const res = await fetch(`${process.env.REACT_APP_API_URL}pessoa/${item.id}`)
         const data = await res.json()
         setIdentifica(data)
         setShowEditClienteModal(true)
@@ -55,6 +99,15 @@ const ClientesInfo = () => {
         setShow(true)
         //setIdentifica(e)
     };
+
+    const handleWithAddresses = (id) => {
+        setTipoEdite("endereco")
+        api.get(`enderecos-cliente/${id}`)
+            .then((response) => {
+                setListaDeEnderecos(response.data)
+            })
+
+    }
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -67,6 +120,7 @@ const ClientesInfo = () => {
             setFilteredCliente([]);
         }
     }
+
 
     return (
         <>
@@ -93,7 +147,6 @@ const ClientesInfo = () => {
                                     <th scope="col">Nome</th>
                                     <th scope="col">cpf/cnpj</th>
                                     <th scope="col">Pedidos</th>
-                                    <th scope="col">Ação</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -108,9 +161,12 @@ const ClientesInfo = () => {
                                         <td className="text-nowrap">12</td>
 
                                         <td className="text-nowrap">
-                                            <Button onClick={() => {handleEditClieteModal(item.id)}}>
+                                            <Button onClick={() => { handleEditClieteModal(item) }}>
                                                 <BiEdit />
                                             </Button>
+                                            {/*  <Button onClick={() => desativar(item.id)} className='btn btn-danger ms-3 text-nowrap'>
+                                                <AiOutlineDelete />
+                                            </Button> */}
                                         </td>
                                     </tr>
                                 ) : <></>
@@ -183,24 +239,406 @@ const ClientesInfo = () => {
                             </Row>
                         </Modal.Body>
                     </Modal>
-                    <Modal fullscreen={true} show={showEditClienteModal} onHide={handleClose}>
-                        
+                    <Modal className="d-flex flex-col" fullscreen={true} show={showEditClienteModal} onHide={handleClose}>
                         <Modal.Header closeButton>
                             <Modal.Title>
-                                Editar dados do cliente {identifica.nome}
+                                Editar dados do cliente {clienteSelecionado && clienteSelecionado.nome}
                             </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <div className="d-flex justify-content-between w-100">
-                                <Button onClick={() => seTipoEdite('pessoal')}>Dados Pessoais</Button> 
-                                <Button onClick={() => seTipoEdite('endereco')}>Endereço</Button>
+                            <div className="d-flex">
+                                <Nav defaultActiveKey="/home" className="flex-column">
+                                    <Nav.Link
+                                        onClick={() => setTipoEdite("pessoal")}
+                                        style={{ color: tipoEdite == "pessoal" ? "white" : "" }}
+                                        eventKey="link-1"
+                                    >
+                                        <FontAwesomeIcon className="mx-2" height={10} icon={faUser} />
+                                        <span className="active">Dados pessoais</span>
+                                    </Nav.Link>
+                                    <Nav.Link
+                                        onClick={() => handleWithAddresses(clienteSelecionado.id)}
+                                        style={{ color: tipoEdite == "endereco" ? "white" : "" }} eventKey="link-2">
+                                        <FontAwesomeIcon className="mx-2" height={10} icon={faHouseUser} />
+                                        <span className="active">Endereço</span>
+
+                                    </Nav.Link>
+                                </Nav>
+                                {tipoEdite == "pessoal" &&
+                                    <>
+                                        <Col>
+                                            <Form className="container w-75">
+                                                <Card className="p-4 mb-4">
+                                                    <h4>Dados pessoais</h4>
+                                                </Card>
+                                                <Row className="mb-2">
+                                                    <Col xs={4}>
+                                                        <Form.Label>
+                                                            Nome:
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Digite o nome"
+                                                            id="nome"
+                                                            name="nome"
+                                                            defaultValue={clienteSelecionado ? clienteSelecionado.nome : ""}
+
+                                                        />
+
+                                                    </Col>
+                                                    <Col xs={6}>
+                                                        <Form.Label>
+                                                            Email:
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            type="email"
+                                                            placeholder="Digite o email"
+                                                            id="email"
+                                                            name="email"
+                                                            defaultValue={clienteSelecionado ? clienteSelecionado.email : ""}
+
+                                                        />
+
+                                                    </Col>
+                                                </Row>
+                                                <Row className="mb-2">
+                                                    <Col xs={4}>
+                                                        <Form.Label>
+                                                            Apelido
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Apelido"
+                                                            id="alias"
+                                                            name="alias"
+                                                            defaultValue={clienteSelecionado ? clienteSelecionado.alias : ""}
+
+                                                        />
+                                                    </Col>
+                                                    <Col xs={3}>
+                                                        <Form.Label>
+                                                            Celular:
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            type="tel"
+                                                            placeholder="Digite o celular"
+                                                            id="celular"
+                                                            name="celular"
+                                                            as={IMaskInput}
+                                                            mask="(00) 0 0000-0000"
+                                                            defaultValue={clienteSelecionado ? clienteSelecionado.celular : ""}
+
+                                                        />
+                                                    </Col>
+                                                    <Col xs={3}>
+                                                        <Form.Label>
+                                                            Telefone:
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            type="tel"
+                                                            placeholder="Digite o telefone"
+                                                            id="telefone"
+                                                            name="telefone"
+                                                            as={IMaskInput}
+                                                            mask="(00) 0000-0000"
+                                                            defaultValue={clienteSelecionado ? clienteSelecionado.telefone : ""}
+
+                                                        />
+                                                    </Col>
+                                                </Row>
+                                                <Row className="mb-4">
+                                                    <Col xs={4}>
+                                                        {clienteSelecionado && clienteSelecionado.tipo == "PF" ?
+                                                            <>
+                                                                <Form.Label>
+                                                                    CPF
+                                                                </Form.Label>
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    placeholder="Digite o CPF"
+                                                                    id="cpfcnpj"
+                                                                    name="cpfcnpj"
+                                                                    as={IMaskInput}
+                                                                    mask="000.000.000-00"
+                                                                    defaultValue={clienteSelecionado.cpfcnpj}
+                                                                />
+                                                            </> :
+                                                            <></>}
+                                                        {clienteSelecionado && clienteSelecionado.tipo == "PJ" ?
+                                                            <>
+                                                                <Form.Label>
+                                                                    CNPJ
+                                                                </Form.Label>
+                                                                <Form.Control
+                                                                    as={IMaskInput}
+                                                                    mask="00.000.000/000-00"
+                                                                    id="cpfcnpj"
+                                                                    name="cpfcnpj"
+                                                                    type="text"
+                                                                    placeholder='Digite o CNPJ'
+                                                                    defaultValue={clienteSelecionado.cpfcnpj}
+                                                                />
+                                                            </> :
+                                                            <></>}
+                                                    </Col>
+                                                    <Col xs={6}>
+                                                        {clienteSelecionado && clienteSelecionado.tipo == "PJ" ?
+                                                            <>
+                                                                <Form.Label>
+                                                                    Razão Social
+                                                                </Form.Label>
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    placeholder="Digite a razão social"
+                                                                    id="cpfcnpj"
+                                                                    name="cpfcnpj"
+                                                                    defaultValue={clienteSelecionado.razao_social}
+                                                                />
+                                                            </> :
+                                                            <></>}
+                                                    </Col>
+                                                </Row>
+                                                <Button>
+                                                    Atualizar dados pessoais
+                                                </Button>
+                                            </Form>
+                                        </Col>
+                                    </>
+                                }
+                                {tipoEdite == "endereco" &&
+                                    <>
+                                        <Form className="container w-75" onSubmit={handleAddSubmit}>
+                                            <Card className="p-4 d-flex flex-row mb-4">
+                                                <h4>Endereços</h4>
+                                                <div className="">
+
+                                                </div>
+                                            </Card>
+
+                                            <Form.Group >
+                                                <Row>
+                                                    {listaDeEnderecos && listaDeEnderecos.quantidade == 0 ?
+                                                        <>
+                                                            <p>Não há endereços cadastrados para esse cliente</p>
+                                                        </>
+                                                        :
+                                                        <>
+                                                            <Form.Group>
+                                                                <Form.Label>
+                                                                    Lista de endereços:
+                                                                </Form.Label>
+                                                                <Form.Select value={enderecoId} onChange={e => setEnderecoId(e.target.value)}>
+                                                                    <option value={null}>Selecione o endereço</option>
+                                                                    {listaDeEnderecos && listaDeEnderecos.enderecos.map((item, key) =>
+                                                                        <option key={key} value={item.id}>
+                                                                            {item.identificacao}
+                                                                        </option>
+                                                                    )}
+                                                                </Form.Select>
+                                                            </Form.Group>
+                                                        </>
+
+                                                    }
+                                                </Row>
+                                                <Row>
+                                                    <Col xs={6}>
+                                                        <Form.Label>
+                                                            CEP:
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            onChange={handleChange}
+                                                            id="cep"
+                                                            as={IMaskInput}
+                                                            type='text'
+                                                            mask="00000-000"
+                                                            defaultValue={enderecoSelecionado && enderecoSelecionado.cep}
+                                                        >
+
+                                                        </Form.Control>
+                                                    </Col>
+                                                    <Col xs={6}>
+                                                        <Form.Label>
+                                                            Número:
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            onChange={handleChange}
+                                                            id="numero"
+                                                            type='text'
+                                                            defaultValue={enderecoSelecionado && enderecoSelecionado.numero}
+
+                                                        >
+
+                                                        </Form.Control>
+                                                    </Col>
+                                                </Row>
+                                            </Form.Group>
+
+                                            <Form.Group className="mb-3">
+
+                                            </Form.Group>
+
+                                            <Form.Group className="mb-3" >
+                                                <Row>
+                                                    <Col xs={7}>
+                                                        <Form.Label>Endereco:</Form.Label>
+                                                        <Form.Control
+                                                            onChange={handleChange}
+                                                            id="logradouro"
+                                                            name="logradouro"
+                                                            type="text"
+                                                            defaultValue={enderecoSelecionado && enderecoSelecionado.logradouro}
+
+                                                        />
+                                                    </Col>
+                                                    <Col xs={5}>
+                                                        <Form.Label>Complemento:</Form.Label>
+                                                        <Form.Control
+                                                            onChange={handleChange}
+                                                            id="complemento"
+                                                            name="complemento"
+                                                            type="text"
+                                                            defaultValue={enderecoSelecionado && enderecoSelecionado.complemento}
+
+                                                        />
+                                                    </Col>
+                                                </Row>
+                                            </Form.Group>
+
+                                            <Form.Group>
+                                                <Row>
+                                                    <Col xs={6}>
+                                                        <Form.Group aria-label="Tipo de cadastro">
+                                                            <Form.Label>Bairro:
+                                                            </Form.Label>
+                                                            <Form.Control
+                                                                onChange={handleChange}
+                                                                id="bairro"
+                                                                as={IMaskInput}
+                                                                type='text'
+                                                                defaultValue={enderecoSelecionado && enderecoSelecionado.bairro}
+
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col xs={6}>
+                                                        <Form.Group aria-label="Tipo de cadastro">
+                                                            <Form.Label>Cidade
+                                                            </Form.Label>
+                                                            <Form.Control
+                                                                onChange={handleChange}
+                                                                id="cidade"
+                                                                type='text'
+                                                                defaultValue={enderecoSelecionado && enderecoSelecionado.cidade}
+
+                                                            />
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
+                                            </Form.Group>
+
+                                            <Form.Group>
+                                                <Row className='mb-4'>
+                                                    <Col xs={2} >
+                                                        <Form.Group aria-label="Tipo de cadastro">
+                                                            <Form.Label>estado:</Form.Label>
+                                                            <Form.Control
+                                                                style={{
+                                                                    width: "80px"
+                                                                }}
+                                                                onChange={handleChange}
+                                                                maxLength="2"
+                                                                minLength="2"
+                                                                id="estado"
+                                                                type='text'
+                                                                defaultValue={enderecoSelecionado && enderecoSelecionado.estado}
+
+                                                            />
+
+                                                        </Form.Group>
+
+                                                    </Col>
+                                                    <Col xs={10} >
+                                                        <Form.Group aria-label="Tipo de cadastro">
+                                                            <Form.Label>Ponto de referencia:</Form.Label>
+                                                            <Form.Control
+                                                                onChange={handleChange}
+                                                                id="obs"
+                                                                type='text'
+                                                                defaultValue={enderecoSelecionado && enderecoSelecionado.obs}
+
+                                                            />
+
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Row className='mb-4'>
+                                                    <Col xs={6} >
+                                                        <Form.Group aria-label="Tipo de cadastro">
+                                                            <Form.Label>Responsável pela entrega:</Form.Label>
+                                                            <Form.Control
+                                                                onChange={handleChange}
+                                                                id="responsavel"
+                                                                type='text'
+                                                                defaultValue={enderecoSelecionado && enderecoSelecionado.responsavel}
+
+                                                            />
+
+                                                        </Form.Group>
+
+                                                    </Col>
+                                                    <Col xs={6} >
+                                                        <Form.Group aria-label="Tipo de cadastro">
+                                                            <Form.Label>Identificação:</Form.Label>
+                                                            <Form.Control
+                                                                onChange={handleChange}
+                                                                id="nome"
+                                                                type='text'
+                                                                defaultValue={enderecoSelecionado && enderecoSelecionado.identificacao}
+
+                                                            />
+
+                                                        </Form.Group>
+
+                                                    </Col>
+                                                </Row>
+                                            </Form.Group>
+                                            <Form.Group>
+                                                <Row className='mb-4'>
+                                                    <Col xs={10} >
+                                                        <Form.Group>
+                                                            {
+                                                                listaDeEnderecos && listaDeEnderecos.quantidade >= 1
+                                                                    ?
+                                                                    <>
+                                                                        <Button style={{ marginRight: "10px" }}>
+                                                                            Atualizar endereço selecionado
+                                                                        </Button>
+                                                                        <Button
+                                                                            onClick={redirectToAddressForm}
+                                                                        >
+                                                                            Cadastrar novo endereço
+                                                                        </Button>
+                                                                    </>
+                                                                    :
+                                                                    <>
+                                                                        <Button>
+                                                                            Cadastrar endereço
+                                                                        </Button>
+                                                                    </>
+
+                                                            }
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
+                                            </Form.Group>
+                                        </Form>
+                                    </>
+                                }
                             </div>
-                            <>
-                            <div className={tipoEdite === 'pessoal' ? '' : 'd-none'}>Pessoa</div>
-                            <div className={tipoEdite === 'endereco' ? '' : 'd-none'}>Endereço</div>
-                            </>
                         </Modal.Body>
-                        
+
                     </Modal>
                 </FalconComponentCard>
             </>

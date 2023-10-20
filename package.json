@@ -4,6 +4,7 @@
   "version": "4.2.0",
   "private": true,
   "dependencies": {
+    "@apollo/client": "^3.8.6",
     "@changey/react-leaflet-markercluster": "^4.0.0-rc1",
     "@emoji-mart/react": "^1.0.1",
     "@emotion/styled": "^11.6.0",
@@ -36,6 +37,7 @@
     "echarts-for-react": "^3.0.1",
     "emoji-mart": "^5.3.3",
     "fuse.js": "^6.4.6",
+    "graphql": "^16.8.1",
     "is_js": "^0.9.0",
     "leaflet": "^1.9.3",
     "leaflet.tilelayer.colorfilter": "^1.2.5",
@@ -85,9 +87,16 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:css": "webpack --config webpack.config.js",
+    "watch:css": "webpack --config webpack.config.js --watch"
   },
- 
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
   "browserslist": [
     ">0.2%",
     "not dead",
@@ -95,11 +104,12 @@
   ],
   "devDependencies": {
     "@automattic/webpack-rtl-plugin": "^6.0.0",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "css-loader": "^6.7.3",
+    "eslint": "^8.51.0",
     "gh-pages": "^5.0.0",
     "mini-css-extract-plugin": "^0.11.3",
-    "prettier": "^2.3.2",
     "sass": "^1.62.1",
     "sass-loader": "^13.2.2",
     "webpack": "^5.82.1",
@@ -108,5 +118,5 @@
   },
   "description": "---",
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }

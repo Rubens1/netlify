@@ -7,49 +7,58 @@ import Avatar from 'components/common/Avatar';
 
 const Notification = ({
   avatar,
-  time,
+  created_at,
   className,
   unread,
+  obs,
   flush,
   emoji,
   children
-}) => (
-  <Link
-    className={classNames(
-      'notification',
-      { 'notification-unread': unread, 'notification-flush': flush },
-      className
-    )}
-    to="#!"
-  >
-    {avatar && (
-      <div className="notification-avatar">
-        <Avatar {...avatar} className="me-3" />
-      </div>
-    )}
-    <div className="notification-body">
-      <p className="mb-1" dangerouslySetInnerHTML={createMarkup(children)} />
-      <span className="notification-time">
-        {emoji && (
-          <span className="me-2" role="img" aria-label="Emoji">
-            {emoji}
-          </span>
-        )}
-        {time}
-      </span>
-    </div>
-  </Link>
-);
+}) => {
+  const option = {
+    year: 'numeric',
+    month: ('long' || 'short' || 'numeric'),
+    weekday: ('long' || 'short'),
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  }
 
-Notification.propTypes = {
-  avatar: PropTypes.shape(Avatar.propTypes),
-  time: PropTypes.string.isRequired,
-  className: PropTypes.string,
-  unread: PropTypes.bool,
-  flush: PropTypes.bool,
-  emoji: PropTypes.string,
-  children: PropTypes.node
-};
+  const locale = "pt-BR";
+
+  const date = new Date(created_at).toLocaleDateString(locale, option);
+  
+
+  return (
+    <Link
+      className={classNames(
+        'notification',
+        { 'notification-unread': unread, 'notification-flush': flush },
+        className
+      )}
+      to="#!"
+    >
+      
+      <div className="notification-body">
+        <p className="mb-1" >{obs}</p>
+        <span className="notification-time">
+          {date}
+        </span>
+      </div>
+    </Link>
+  );
+
+  Notification.propTypes = {
+    avatar: PropTypes.shape(Avatar.propTypes),
+    time: PropTypes.string.isRequired,
+    className: PropTypes.string,
+    unread: PropTypes.bool,
+    flush: PropTypes.bool,
+    emoji: PropTypes.string,
+    children: PropTypes.node
+  }
+}
+  ;
 
 Notification.defaultProps = { unread: false, flush: false };
 
