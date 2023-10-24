@@ -22,7 +22,7 @@ const singleSelectCode = `function SingleSelectExample() {
     <Select
       closeMenuOnSelect={false}
       options={organizerOptions}
-      placeholder='Select...'
+      placeholder='Selecione...'
       classNamePrefix="react-select"
       value={value}
       onChange={value => setValue(value)}
@@ -42,7 +42,7 @@ const multipleSelectCode = `function MultipleSelectExample() {
     <Select
       closeMenuOnSelect={false}
       options={organizerOptions}
-      placeholder='Select...'
+      placeholder='Selecione...'
       isMulti
       classNamePrefix="react-select"
       value={value}
@@ -75,7 +75,7 @@ const reactSelectValidationCode = `
     ];
 
     const onSubmit = data => {
-      console.log(data);
+
     };
 
     return (
@@ -185,7 +185,7 @@ const ReactSelectValidation = () => {
   ];
 
   const onSubmit = data => {
-    console.log(data);
+
   };
 
   return (

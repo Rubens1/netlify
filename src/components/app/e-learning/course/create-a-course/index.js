@@ -24,7 +24,6 @@ const CreateCourse = () => {
   });
 
   const onSubmit = data => {
-    console.log(data);
     // ------- Get all object keys form data and set empty values to reset ------------
     const keys = Object.keys(data);
     for (const key of keys) {

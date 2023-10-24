@@ -1,4 +1,3 @@
-import Divider from 'components/common/Divider';
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 import { Button, Col, Form, Row } from 'react-bootstrap';
@@ -6,49 +5,32 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
 const LoginForm = ({ hasLabel, layout }) => {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let token = localStorage.getItem('tokenUser');
-
-    if (token) {
-      navigate("/")
-    }
-
-    if (localStorage.getItem("emailStorage") && localStorage.getItem("senhaStorage")) {
-      formData.email = localStorage.getItem("emailStorage");
-      formData.senha = localStorage.getItem("senhaStorage");
-      formData.remember = true;
-    } else {
-      formData.remember = false;
-    }
-
-  }, [])
-
+  
+  // State
   const [formData, setFormData] = useState({
     email: '',
     senha: '',
     remember: false
-  });
-
+  });      
   // Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     const email = formData.email;
     const senha = formData.senha;
-
+    
     axios.post(`${process.env.REACT_APP_API_URL}pessoa-entrar`, {
       email: email,
       senha: senha
     }).then((response) => {
       const token = JSON.stringify(response.data.authorization.token);
-
       localStorage.setItem('tokenUser', token.replace(/"/g, ''));
-      
-      navigate("/")
-
+      toast.success(`Usuário conectado com sucesso`, {
+        theme: 'colored',
+        position: "top-right"
+      });
+      window.location.href =  window.location.protocol + "//" + window.location.host
     }).catch(error => {
       toast.error(error.response.data.error, {
         theme: 'colored',
@@ -61,6 +43,19 @@ const LoginForm = ({ hasLabel, layout }) => {
       });
     })
   };
+  useEffect(()=>{
+    if (localStorage.getItem("tokenUser")) {
+      navigate("/")
+    }
+    if(localStorage.getItem("emailStorage") && localStorage.getItem("senhaStorage")){
+      formData.email = localStorage.getItem("emailStorage");
+      formData.senha = localStorage.getItem("senhaStorage");
+      formData.remember = true;
+    }else{
+      formData.remember = false;
+    }
+    
+  },[])
 
   const handleFieldChange = async (e) => {
     setFormData({
@@ -71,15 +66,15 @@ const LoginForm = ({ hasLabel, layout }) => {
   };
 
   const lembrete = (e) => {
-    if (formData.remember == false) {
+    if(formData.remember == false){
       localStorage.setItem('emailStorage', formData.email);
       localStorage.setItem('senhaStorage', formData.senha);
       formData.remember = true;
-    } else {
+    }else{
       localStorage.removeItem("emailStorage");
       localStorage.removeItem("senhaStorage");
       formData.remember = false;
-    }
+    }  
   }
   return (
     <Form onSubmit={handleSubmit}>

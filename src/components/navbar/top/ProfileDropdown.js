@@ -14,12 +14,12 @@ const ProfileDropdown = () => {
 
   const logout = async (e) => {
     let token = localStorage.getItem('tokenUser');
-
+  
     axios.post(`${process.env.REACT_APP_API_URL}pessoa-sair`, {}, {
       headers: {
         'Authorization': `Bearer ${token}`
       },
-      timeout: 1000
+      timeout: 1000 
     }).then((response) => {
       localStorage.removeItem("tokenUser");
       toast.success(`Usuário desconectado com sucesso`, {
@@ -46,9 +46,9 @@ const ProfileDropdown = () => {
 
       <Dropdown.Menu className="dropdown-caret dropdown-menu-card  dropdown-menu-end">
         <div className="bg-white rounded-2 py-2 dark__bg-1000">
-
+          
           <Dropdown.Item href="">Meu perfil</Dropdown.Item>
-
+          
           <Dropdown.Item >
             <div className='logout' onClick={e => logout(e)}>Sair</div>
           </Dropdown.Item>

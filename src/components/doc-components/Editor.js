@@ -97,7 +97,7 @@ const TinymceValidation = () => {
     resolver: yupResolver(schema)
   });
   const onSubmit = data => {
-    console.log(data);
+
   };
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>

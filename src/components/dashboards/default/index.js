@@ -26,9 +26,9 @@ import SharedFiles from './SharedFiles';
 import ActiveUsers from './ActiveUsers';
 import BandwidthSaved from './BandwidthSaved';
 import TopProducts from './TopProducts';
-import Weather from './Weather';
-
 const Dashboard = () => {
+
+  
   return (
     <>
       <Row className="g-3 mb-3">

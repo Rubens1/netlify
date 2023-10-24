@@ -1,153 +1,88 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Card, Col, Form, Row } from 'react-bootstrap';
 import FalconCardHeader from 'components/common/FalconCardHeader';
-import { IMaskInput } from "react-imask";
-import { api } from 'api/api';
-import { ProfileContext } from '../profile/Profile';
-import { FormContext } from 'context/Context';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const ProfileSettings = ({ ...props }) => {
 
-  const { formData, setformData } = useContext(ProfileContext)
-  const [newData, setNewData] = useState();
+  const { formData } = props;
 
-  console.log(newData)
-  const handleSubmit = (e) => {
+  const editarPerfil = async (e) => {
     e.preventDefault();
 
-    api.put(`editar-pessoa/${formData.id}`, newData)
-      .then((response) => {
-        toast.success(`${response.data.message}`, {
-          theme: 'colored',
-          position: "top-right"
-        });
-      })
-      .catch((error) => {
-        console.log(error)
-      const status = error.response.status;
-      const e = error.response.data.errors;
+    let id = formData.id;
+    let token = localStorage.getItem('tokenUser');
 
-      if (status == 429) {
-        toast.error("Muitas tentativas em um curto espaço de tempo tente daqui alguns minutos.", {
-          theme: 'colored',
-          position: "top-right"
-        });
-      }
-
-      Object.keys(e).map(i => {
-        toast.error(e[`${i}`][0], {
-          theme: 'colored',
-          position: "top-right"
-        });
-      })
-      })
-
+    let article = '';
+    if(e.target.email.value == formData.email){
+      article = {nome: e.target.nome.value}
+    }else{
+      article = {nome: e.target.nome.value, email: e.target.email.value};
+    }
+    const header = {
+      headers: {
+      'Authorization': `Bearer ${token}`
+    }
   }
-
-  const handleChange = (e) => {
-    e.preventDefault();
-
-    const key = e.target.id;
-    const value = e.target.value;
-
-    setNewData(newData => ({
-      ...newData,
-      [key]: value
-    }));
-
+    axios.put(`${process.env.REACT_APP_API_URL}editar-pessoa/${id}`,  
+              article,
+              header
+            )
+            .then((response) => {
+                toast.success('Perfil Atualizado com sucesso', {
+                    theme: 'colored',
+                    position: "top-right"
+                  });
+                  
+            }).catch((error) => {
+                toast.error('Erro ao editar os dados', {
+                    theme: 'colored',
+                    position: "top-right"
+                  });
+            });
   }
+ 
   return (
     <Card>
       <FalconCardHeader title="Meu perfil " />
       <Card.Body className="bg-light">
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={(e) => editarPerfil(e)}>
           <Row className="mb-3 g-3">
             <Form.Group as={Col} lg={6} >
               <Form.Label>Nome</Form.Label>
               <Form.Control
                 type="text"
                 id="nome"
-                placeholder="Nome completo"
+                placeholder="Digita o seu nome completo"
                 defaultValue={formData.nome}
                 name="nome"
-                onChange={handleChange}
               />
             </Form.Group>
 
-            <Form.Group as={Col} lg={6} >
-              <Form.Label>Apelido</Form.Label>
-              <Form.Control
-                type="text"
-                id="alias"
-                placeholder="Apelido"
-                defaultValue={formData.alias}
-                name="alias"
-                onChange={handleChange}
-              />
-            </Form.Group>
-          </Row>
-          <Row className="mb-3 g-3">
             <Form.Group as={Col} lg={6} >
               <Form.Label>Email</Form.Label>
               <Form.Control
-                id="email"
                 type="email"
-                placeholder="Email"
+                placeholder="Digita o email"
                 defaultValue={formData.email}
                 name="email"
-                onChange={handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group as={Col} lg={6} >
-              <Form.Label>Celular</Form.Label>
-              <Form.Control
-                as={IMaskInput}
-                mask="(00) 0 0000-000"
-                type="tel"
-                id="celular"
-                placeholder="telfone"
-                defaultValue={formData.celular}
-                name="celular"
-                onChange={handleChange}
               />
             </Form.Group>
           </Row>
-          <Row className="mb-3 g-3">
-            <Form.Group as={Col} lg={6}>
-              <Form.Label>Telefone fixo</Form.Label>
-              <Form.Control
-                as={IMaskInput}
-                id="telefone"
-                mask="(00) 0000-0000"
-                type="tel"
-                placeholder="Telefone fixo"
-                defaultValue={formData.telefone}
-                name="tel_fixo"
-                onChange={handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group as={Col} lg={6}>
-              <Form.Label>Celular</Form.Label>
-              <Form.Control
-                as={IMaskInput}
-                id="rg"
-                mask="00.000.000-00"
-                type="text"
-                placeholder="RG"
-                defaultValue={formData.rg}
-                name="rg"
-                onChange={handleChange}
-              />
-            </Form.Group>
-          </Row>
-          <div className="text-end">
-            <Button variant="primary" type="submit">
-              Update
+          
+          <Row>
+            <Col className="text-start">
+            <Button variant="success" type="submit">
+              Editar Senha
             </Button>
-          </div>
+            </Col>
+          <Col className="text-end">
+            <Button variant="primary" type="submit">
+              Editar
+            </Button>
+          </Col>
+          </Row>
         </Form>
       </Card.Body>
     </Card>

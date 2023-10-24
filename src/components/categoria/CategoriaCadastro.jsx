@@ -19,7 +19,6 @@ const CategoriaCadastro = () => {
 
   }, [newCategory])
 
-
   const cadastra = async (e) => {
     e.preventDefault();
     let categoria = e.target.categoria.value;
@@ -39,7 +38,6 @@ const CategoriaCadastro = () => {
       });
 
     }).catch((error) => {
-      console.log(error)
       const status = error.response.status;
       const e = error.response.data.errors;
 

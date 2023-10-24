@@ -9,6 +9,7 @@ import SettingsToggle from 'components/settings-panel/SettingsToggle';
 import SettingsPanel from 'components/settings-panel/SettingsPanel';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-toastify/dist/ReactToastify.min.css';
+//import { inicial } from 'api/api';
 
 const App = () => {
   const HTMLClassList = document.getElementsByTagName('html')[0].classList;
@@ -31,6 +32,10 @@ const App = () => {
     }
   }, [HTMLClassList]);
 
+  /* useEffect(() => {
+    inicial()
+  }, [])
+   */
   useEffect(() => {
     if (navbarPosition === 'double-top') {
       HTMLClassList.add('double-top-nav-layout');
@@ -39,7 +44,7 @@ const App = () => {
   }, [navbarPosition]);
 
   return (
-    <Router basename={process.env.PUBLIC_URL}>
+    <Router>
       <FalconRoutes />
       <SettingsToggle />
       <SettingsPanel />

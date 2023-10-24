@@ -211,7 +211,6 @@ function FileUploadValidation() {
   };
 
   const onSubmit = data => {
-    console.log(data);
   };
 
   return (
@@ -384,7 +383,6 @@ const FileUploadValidation = () => {
   };
 
   const onSubmit = data => {
-    console.log(data);
   };
 
   return (

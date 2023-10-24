@@ -14,6 +14,7 @@ import { faUser, faHouseUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMaskInput } from 'react-imask';
 import { api } from "api/api";
+import { toast } from "react-toastify";
 
 const ClientesInfo = () => {
     const [clientes, setClientes] = useState();
@@ -30,13 +31,16 @@ const ClientesInfo = () => {
     const [listaDeEnderecos, setListaDeEnderecos] = useState();
     const [enderecoId, setEnderecoId] = useState();
     const [enderecoSelecionado, setEnderecoSelecionado] = useState();
+    const [enderecoAtualizado, setEnderecoAtualizado] = useState();
+    const [dadosAtualizado, setDadosAtualizado] = useState();
+    const [freshData, setFreshData] = useState();
 
     const navigate = useNavigate();
 
     useEffect(() => {
         const id = Number(enderecoId);
 
-        if(enderecoId == null || !enderecoId) {
+        if (enderecoId == null || !enderecoId) {
             setEnderecoSelecionado(null)
         }
 
@@ -46,6 +50,9 @@ const ClientesInfo = () => {
                     setEnderecoSelecionado(prevState => response.data)
                 })
         }
+    }, [enderecoId])
+
+    useEffect(() => {
 
         axios.get(`${link ?? process.env.REACT_APP_API_URL + "pessoas-lista-paginada?page=1"}`, {
         })
@@ -58,10 +65,8 @@ const ClientesInfo = () => {
 
         const search = document.getElementById("nome");
 
-    }, [link, enderecoId, enderecoSelecionado])
+    }, [link, freshData])
 
-
-    console.log(enderecoId);
 
     const redirectToAddressForm = () => {
         localStorage.setItem("user_id", clienteSelecionado.id);
@@ -69,22 +74,82 @@ const ClientesInfo = () => {
         navigate("/cadastrar-endereco")
     }
 
-    const handleSubmit = () => {
+    const handleDadosChange = (e) => {
+        e.preventDefault();
+
+        const key = e.target.id;
+        const value = e.target.value;
+
+        if (key == "data_n") {
+            const date_input = document.getElementById("data_n").value;
+
+            if (date_input.length == 10) {
+
+                const day = date_input.split("/")[0];
+                const month = date_input.split("/")[1];
+                const year = date_input.split("/")[2];
+
+                const data_nasc = {
+                    "data_nasc": `${year}${month}${day}`
+                }
+
+                setDadosAtualizado(dadosAtualizado => ({
+                    ...dadosAtualizado,
+                    ...data_nasc
+                }));
+            }
+        }
+
+
+        setDadosAtualizado(dadosAtualizado => ({
+            ...dadosAtualizado,
+            [key]: value
+        }));
+    }
+
+    const handleDadosSubmit = (e) => {
+        e.preventDefault();
+
+        api.put(`editar-pessoa/${clienteSelecionado.id}`, dadosAtualizado)
+            .then((response) => {
+                setFreshData(true);
+                toast.success(`Dados do ${clienteSelecionado.nome.split(" ")[0]} atualizado com sucesso`, {
+                    theme: 'colored',
+                    position: "top-right"
+                });
+            })
+            .catch((error) => {
+                const e = error.response.data.errors
+
+                Object.keys(e).map(i => {
+                    toast.error(e[`${i}`][0].replace("campo", " "), {
+                        theme: 'colored',
+                        position: "top-right"
+                    });
+                })
+            })
+    }
+
+    const handleEnderecoChange = (e) => {
+        e.preventDefault();
+
+        const key = e.target.id;
+        const value = e.target.value;
+
+        setEnderecoAtualizado(enderecoAtualizado => ({
+            ...enderecoAtualizado,
+            [key]: value
+        }));
 
     }
 
-    const handleAddSubmit = () => {
-
-    }
-    const handleChange = () => {
-
-    }
     const handleClose = () => {
         setShow(false)
         setShowEditClienteModal(false)
         setListaDeEnderecos('')
         setTipoEdite('pessoal')
         setEnderecoId(null)
+        setFreshData(false)
     };
 
     const handleEditClieteModal = async (item) => {
@@ -100,10 +165,31 @@ const ClientesInfo = () => {
         //setIdentifica(e)
     };
 
+
+    console.log(listaDeEnderecos);
+    
+    const submitAddressEdit = (e) => {
+
+        api.put(`editar-endereco/${enderecoSelecionado.id}`, enderecoAtualizado)
+            .then((response) => {
+                toast.success("Dados de endereço atualizado.", {
+                    theme: 'colored',
+                    position: "top-right"
+                });
+            })
+            .catch((error) => {
+                toast.error("Erro ao atualizar dados endereço tente mais tarde", {
+                    theme: 'colored',
+                    position: "top-right"
+                });
+            })
+    }
+
     const handleWithAddresses = (id) => {
         setTipoEdite("endereco")
         api.get(`enderecos-cliente/${id}`)
             .then((response) => {
+                console.log(response)
                 setListaDeEnderecos(response.data)
             })
 
@@ -121,11 +207,18 @@ const ClientesInfo = () => {
         }
     }
 
+    const date = new Date(clienteSelecionado && clienteSelecionado.data_nasc);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate() + 1).padStart(2, '0');
+
+    const formattedDate = `${day}/${month}/${year}`;
 
     return (
         <>
             <>
-                <PageHeader title="Lista de clientes" className="mb-3" ></PageHeader>
+                <PageHeader title="Lista de clientes" className="mb-3" />
                 <Row className="d-flex justify-content-between">
                     <Col xs={6} className="d-flex justify-content-start">
                         <Button className="mb-4" onClick={() => { navigate("/cadastrar-cliente") }}>
@@ -145,7 +238,7 @@ const ClientesInfo = () => {
                             <thead>
                                 <tr>
                                     <th scope="col">Nome</th>
-                                    <th scope="col">cpf/cnpj</th>
+                                    <th scope="col">CPF/CNPJ</th>
                                     <th scope="col">Pedidos</th>
                                 </tr>
                             </thead>
@@ -214,7 +307,7 @@ const ClientesInfo = () => {
                                     <thead>
                                         <tr>
                                             <th scope="col">Nome</th>
-                                            <th scope="col">cpf/cnpj</th>
+                                            <th scope="col">CPF/CNPJ</th>
                                             <th scope="col">Pedidos</th>
                                         </tr>
                                     </thead>
@@ -242,7 +335,9 @@ const ClientesInfo = () => {
                     <Modal className="d-flex flex-col" fullscreen={true} show={showEditClienteModal} onHide={handleClose}>
                         <Modal.Header closeButton>
                             <Modal.Title>
-                                Editar dados do cliente {clienteSelecionado && clienteSelecionado.nome}
+                                Editar dados do cliente {" "}
+                                {clienteSelecionado && clienteSelecionado.nome.split(" ")[0]}
+                                {clienteSelecionado && clienteSelecionado.tipo == "PJ" ? ` da empressa ${clienteSelecionado.razao_social ?? ""}` : ""}
                             </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
@@ -250,7 +345,7 @@ const ClientesInfo = () => {
                                 <Nav defaultActiveKey="/home" className="flex-column">
                                     <Nav.Link
                                         onClick={() => setTipoEdite("pessoal")}
-                                        style={{ color: tipoEdite == "pessoal" ? "white" : "" }}
+                                        style={{ color: tipoEdite == "pessoal" ? "var(--falcon-green)" : "var(--falcon-secondary)" }}
                                         eventKey="link-1"
                                     >
                                         <FontAwesomeIcon className="mx-2" height={10} icon={faUser} />
@@ -258,7 +353,7 @@ const ClientesInfo = () => {
                                     </Nav.Link>
                                     <Nav.Link
                                         onClick={() => handleWithAddresses(clienteSelecionado.id)}
-                                        style={{ color: tipoEdite == "endereco" ? "white" : "" }} eventKey="link-2">
+                                        style={{ color: tipoEdite == "endereco" ? "var(--falcon-green)" : "var(--falcon-secondary)" }} eventKey="link-2">
                                         <FontAwesomeIcon className="mx-2" height={10} icon={faHouseUser} />
                                         <span className="active">Endereço</span>
 
@@ -267,7 +362,7 @@ const ClientesInfo = () => {
                                 {tipoEdite == "pessoal" &&
                                     <>
                                         <Col>
-                                            <Form className="container w-75">
+                                            <Form onSubmit={handleDadosSubmit} className="container w-75">
                                                 <Card className="p-4 mb-4">
                                                     <h4>Dados pessoais</h4>
                                                 </Card>
@@ -281,6 +376,7 @@ const ClientesInfo = () => {
                                                             placeholder="Digite o nome"
                                                             id="nome"
                                                             name="nome"
+                                                            onChange={handleDadosChange}
                                                             defaultValue={clienteSelecionado ? clienteSelecionado.nome : ""}
 
                                                         />
@@ -295,6 +391,7 @@ const ClientesInfo = () => {
                                                             placeholder="Digite o email"
                                                             id="email"
                                                             name="email"
+                                                            onChange={handleDadosChange}
                                                             defaultValue={clienteSelecionado ? clienteSelecionado.email : ""}
 
                                                         />
@@ -311,6 +408,7 @@ const ClientesInfo = () => {
                                                             placeholder="Apelido"
                                                             id="alias"
                                                             name="alias"
+                                                            onChange={handleDadosChange}
                                                             defaultValue={clienteSelecionado ? clienteSelecionado.alias : ""}
 
                                                         />
@@ -324,6 +422,7 @@ const ClientesInfo = () => {
                                                             placeholder="Digite o celular"
                                                             id="celular"
                                                             name="celular"
+                                                            onChange={handleDadosChange}
                                                             as={IMaskInput}
                                                             mask="(00) 0 0000-0000"
                                                             defaultValue={clienteSelecionado ? clienteSelecionado.celular : ""}
@@ -340,18 +439,85 @@ const ClientesInfo = () => {
                                                             id="telefone"
                                                             name="telefone"
                                                             as={IMaskInput}
+                                                            onChange={handleDadosChange}
                                                             mask="(00) 0000-0000"
                                                             defaultValue={clienteSelecionado ? clienteSelecionado.telefone : ""}
 
                                                         />
                                                     </Col>
                                                 </Row>
-                                                <Row className="mb-4">
-                                                    <Col xs={4}>
-                                                        {clienteSelecionado && clienteSelecionado.tipo == "PF" ?
-                                                            <>
+                                                <Row>
+                                                    {clienteSelecionado && clienteSelecionado.tipo == "PJ" ?
+                                                        <>
+                                                            <Col xs={5}>
                                                                 <Form.Label>
-                                                                    CPF
+                                                                    CCM:
+                                                                </Form.Label>
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    id="ccm"
+                                                                    as={IMaskInput}
+                                                                    mask="0.000.00-0"
+                                                                    placeholder="Digite o CCM"
+                                                                />
+                                                            </Col>
+                                                            <Col xs={4}>
+                                                                <Form.Label>
+                                                                    Inscrição estadual:
+                                                                </Form.Label>
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    id="ie"
+                                                                    placeholder="Digite a inscrição estadual"
+                                                                />
+                                                            </Col>
+                                                        </>
+                                                        : <></>
+
+                                                    }
+                                                </Row>
+                                                <Row>
+                                                    {clienteSelecionado && clienteSelecionado.tipo == "PF" &&
+                                                        <>
+                                                            <Col xs={3}>
+                                                                <Form.Label>
+                                                                    Sexo:
+                                                                </Form.Label>
+                                                                <Form.Select defaultValue={clienteSelecionado.sexo}>
+                                                                    <option value="M">Masculíno</option>
+                                                                    <option value="F">Feminino</option>
+                                                                </Form.Select>
+                                                            </Col>
+                                                            <Col xs={3}>
+                                                                <Form.Label>
+                                                                    RG:
+                                                                </Form.Label>
+                                                                <Form.Control
+                                                                    as={IMaskInput}
+                                                                    mask="00.000.000-00"
+                                                                    id="rg"
+                                                                    type="text"
+                                                                    defaultValue={clienteSelecionado && clienteSelecionado.rg}
+                                                                    placeholder="Digite o RG"
+                                                                />
+                                                            </Col>
+                                                            <Col xs={4}>
+                                                                <Form.Group>
+                                                                    <Form.Label>
+                                                                        Orgão emissor:
+                                                                    </Form.Label>
+                                                                    <Form.Control
+                                                                        type="text"
+                                                                        id="orgao_emissor"
+                                                                        onChange={handleDadosChange}
+                                                                        placeholder="Digite o orgão emissor"
+                                                                        defaultValue={clienteSelecionado && formattedDate}
+                                                                    />
+                                                                </Form.Group>
+                                                            </Col>
+                                                            <Col xs={3}>
+                                                                <Form.Label>
+                                                                    CPF:
                                                                 </Form.Label>
                                                                 <Form.Control
                                                                     type="text"
@@ -360,55 +526,87 @@ const ClientesInfo = () => {
                                                                     name="cpfcnpj"
                                                                     as={IMaskInput}
                                                                     mask="000.000.000-00"
-                                                                    defaultValue={clienteSelecionado.cpfcnpj}
+                                                                    onChange={handleDadosChange}
+                                                                    defaultValue={clienteSelecionado ? clienteSelecionado.cpf : ""}
+
                                                                 />
-                                                            </> :
-                                                            <></>}
+                                                            </Col>
+
+                                                            <Col xs={4}>
+                                                                <Form.Group>
+                                                                    <Form.Label>
+                                                                        Data de nascimento:
+                                                                    </Form.Label>
+                                                                    <Form.Control
+                                                                        as={IMaskInput}
+                                                                        mask="00/00/0000"
+                                                                        type="text"
+                                                                        id="data_n"
+                                                                        onChange={handleDadosChange}
+                                                                        placeholder="00/00/0000"
+                                                                        defaultValue={clienteSelecionado && formattedDate}
+                                                                    />
+                                                                </Form.Group>
+                                                            </Col>
+                                                        </>
+                                                    }
+
+                                                    <Row className="mb-4">
                                                         {clienteSelecionado && clienteSelecionado.tipo == "PJ" ?
                                                             <>
-                                                                <Form.Label>
-                                                                    CNPJ
-                                                                </Form.Label>
-                                                                <Form.Control
-                                                                    as={IMaskInput}
-                                                                    mask="00.000.000/000-00"
-                                                                    id="cpfcnpj"
-                                                                    name="cpfcnpj"
-                                                                    type="text"
-                                                                    placeholder='Digite o CNPJ'
-                                                                    defaultValue={clienteSelecionado.cpfcnpj}
-                                                                />
+                                                                <Col xs={4}>
+                                                                    <Form.Label>
+                                                                        CNPJ:
+                                                                    </Form.Label>
+                                                                    <Form.Control
+                                                                        as={IMaskInput}
+                                                                        mask="00.000.000/000-00"
+                                                                        id="cpfcnpj"
+                                                                        name="cpfcnpj"
+                                                                        type="text"
+                                                                        onChange={handleDadosChange}
+                                                                        placeholder='Digite o CNPJ'
+                                                                        defaultValue={clienteSelecionado ? clienteSelecionado.cpfcnpj : ""}
+
+                                                                    />
+                                                                </Col>
                                                             </> :
-                                                            <></>}
-                                                    </Col>
-                                                    <Col xs={6}>
+                                                            <></>
+                                                        }
                                                         {clienteSelecionado && clienteSelecionado.tipo == "PJ" ?
                                                             <>
-                                                                <Form.Label>
-                                                                    Razão Social
-                                                                </Form.Label>
-                                                                <Form.Control
-                                                                    type="text"
-                                                                    placeholder="Digite a razão social"
-                                                                    id="cpfcnpj"
-                                                                    name="cpfcnpj"
-                                                                    defaultValue={clienteSelecionado.razao_social}
-                                                                />
+                                                                <Col xs={5}>
+                                                                    <Form.Label>
+                                                                        Razão Social
+                                                                    </Form.Label>
+                                                                    <Form.Control
+                                                                        type="text"
+                                                                        placeholder="Digite a razão social"
+                                                                        onChange={handleDadosChange}
+                                                                        id="razao_social"
+                                                                        name="cpfcnpj"
+                                                                        defaultValue={clienteSelecionado && clienteSelecionado.razao_social}
+                                                                    />
+                                                                </Col>
                                                             </> :
                                                             <></>}
-                                                    </Col>
+
+                                                    </Row>
+                                                    <Row>
+
+                                                    </Row>
+                                                    <Button type="submit">
+                                                        Atualizar dados pessoais
+                                                    </Button>
                                                 </Row>
-                                                <Button>
-                                                    Atualizar dados pessoais
-                                                </Button>
                                             </Form>
                                         </Col>
                                     </>
                                 }
                                 {tipoEdite == "endereco" &&
                                     <>
-                                        <Form className="container w-75" onSubmit={handleAddSubmit}>
-                                            <Card className="p-4 d-flex flex-row mb-4">
+                                        <Form className="container w-75" onSubmit={submitAddressEdit}>
+                                            <Card className="p-4 h-6 d-flex flex-row mb-4">
                                                 <h4>Endereços</h4>
                                                 <div className="">
 
@@ -428,12 +626,13 @@ const ClientesInfo = () => {
                                                                     Lista de endereços:
                                                                 </Form.Label>
                                                                 <Form.Select value={enderecoId} onChange={e => setEnderecoId(e.target.value)}>
-                                                                    <option value={null}>Selecione o endereço</option>
-                                                                    {listaDeEnderecos && listaDeEnderecos.enderecos.map((item, key) =>
+                                                                    <option value={null}>Selecione algum endereço</option>
+                                                                    {listaDeEnderecos ? listaDeEnderecos.enderecos.map((item, key) =>
                                                                         <option key={key} value={item.id}>
                                                                             {item.identificacao}
                                                                         </option>
-                                                                    )}
+
+                                                                    ) : <></>}
                                                                 </Form.Select>
                                                             </Form.Group>
                                                         </>
@@ -446,7 +645,7 @@ const ClientesInfo = () => {
                                                             CEP:
                                                         </Form.Label>
                                                         <Form.Control
-                                                            onChange={handleChange}
+                                                            onChange={handleEnderecoChange}
                                                             id="cep"
                                                             as={IMaskInput}
                                                             type='text'
@@ -461,7 +660,7 @@ const ClientesInfo = () => {
                                                             Número:
                                                         </Form.Label>
                                                         <Form.Control
-                                                            onChange={handleChange}
+                                                            onChange={handleEnderecoChange}
                                                             id="numero"
                                                             type='text'
                                                             defaultValue={enderecoSelecionado && enderecoSelecionado.numero}
@@ -482,7 +681,7 @@ const ClientesInfo = () => {
                                                     <Col xs={7}>
                                                         <Form.Label>Endereco:</Form.Label>
                                                         <Form.Control
-                                                            onChange={handleChange}
+                                                            onChange={handleEnderecoChange}
                                                             id="logradouro"
                                                             name="logradouro"
                                                             type="text"
@@ -493,7 +692,7 @@ const ClientesInfo = () => {
                                                     <Col xs={5}>
                                                         <Form.Label>Complemento:</Form.Label>
                                                         <Form.Control
-                                                            onChange={handleChange}
+                                                            onChange={handleEnderecoChange}
                                                             id="complemento"
                                                             name="complemento"
                                                             type="text"
@@ -511,7 +710,7 @@ const ClientesInfo = () => {
                                                             <Form.Label>Bairro:
                                                             </Form.Label>
                                                             <Form.Control
-                                                                onChange={handleChange}
+                                                                onChange={handleEnderecoChange}
                                                                 id="bairro"
                                                                 as={IMaskInput}
                                                                 type='text'
@@ -525,7 +724,7 @@ const ClientesInfo = () => {
                                                             <Form.Label>Cidade
                                                             </Form.Label>
                                                             <Form.Control
-                                                                onChange={handleChange}
+                                                                onChange={handleEnderecoChange}
                                                                 id="cidade"
                                                                 type='text'
                                                                 defaultValue={enderecoSelecionado && enderecoSelecionado.cidade}
@@ -545,7 +744,7 @@ const ClientesInfo = () => {
                                                                 style={{
                                                                     width: "80px"
                                                                 }}
-                                                                onChange={handleChange}
+                                                                onChange={handleEnderecoChange}
                                                                 maxLength="2"
                                                                 minLength="2"
                                                                 id="estado"
@@ -561,7 +760,7 @@ const ClientesInfo = () => {
                                                         <Form.Group aria-label="Tipo de cadastro">
                                                             <Form.Label>Ponto de referencia:</Form.Label>
                                                             <Form.Control
-                                                                onChange={handleChange}
+                                                                onChange={handleEnderecoChange}
                                                                 id="obs"
                                                                 type='text'
                                                                 defaultValue={enderecoSelecionado && enderecoSelecionado.obs}
@@ -578,7 +777,7 @@ const ClientesInfo = () => {
                                                         <Form.Group aria-label="Tipo de cadastro">
                                                             <Form.Label>Responsável pela entrega:</Form.Label>
                                                             <Form.Control
-                                                                onChange={handleChange}
+                                                                onChange={handleEnderecoChange}
                                                                 id="responsavel"
                                                                 type='text'
                                                                 defaultValue={enderecoSelecionado && enderecoSelecionado.responsavel}
@@ -592,7 +791,7 @@ const ClientesInfo = () => {
                                                         <Form.Group aria-label="Tipo de cadastro">
                                                             <Form.Label>Identificação:</Form.Label>
                                                             <Form.Control
-                                                                onChange={handleChange}
+                                                                onChange={handleEnderecoChange}
                                                                 id="nome"
                                                                 type='text'
                                                                 defaultValue={enderecoSelecionado && enderecoSelecionado.identificacao}
@@ -612,11 +811,13 @@ const ClientesInfo = () => {
                                                                 listaDeEnderecos && listaDeEnderecos.quantidade >= 1
                                                                     ?
                                                                     <>
-                                                                        <Button style={{ marginRight: "10px" }}>
+                                                                        <Button
+                                                                            onClick={submitAddressEdit}
+                                                                            style={{ marginRight: "10px" }}>
                                                                             Atualizar endereço selecionado
                                                                         </Button>
                                                                         <Button
-                                                                            onClick={redirectToAddressForm}
+                                                                            type="submit"
                                                                         >
                                                                             Cadastrar novo endereço
                                                                         </Button>

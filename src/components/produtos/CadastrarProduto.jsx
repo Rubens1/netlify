@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { Button, Card, Col, Row, Form, Dropdown, Mo } from 'react-bootstrap';
 import PageHeader from 'components/common/PageHeader';
+import TinymceEditor from 'components/common/TinymceEditor';
 import axios from "axios";
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import TinymceEditor from 'components/common/TinymceEditor';
 
 import { getSize } from 'helpers/utils';
 import { useDropzone } from 'react-dropzone';
@@ -26,7 +26,7 @@ const CadastrarProduto = () => {
   }
 
   const handleChange = (e) => {
-    //e.preventDefault();
+    e.preventDefault();
 
     const key = e.target.id;
     const value = e.target.value;
@@ -56,9 +56,9 @@ const CadastrarProduto = () => {
     const largura = e.target.largura.value;
     const comprimento = e.target.comprimento.value;
     const peso = e.target.peso.value;
+    const descricao = tinymce.activeEditor.getContent();
     const keywords = e.target.keywords.value;
     const descricao_seo = e.target.descricao_seo.value;
-    const descricao = tinymce.activeEditor.getContent();
 
     axios.post(`${process.env.REACT_APP_API_URL}cadastrar-produto`, {
       'nome': nome,
@@ -69,13 +69,12 @@ const CadastrarProduto = () => {
       'comprimento': comprimento,
       'peso': peso,
       'long_description': descricao,
-      'descricao': descricao,
+      'descricao': descricao_seo,
       'keywords': keywords,
       'src': capaSelecionada,
-      "obs": `Cadastrou o produto ${nome}`
     }, {
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem('tokenUser').replace(/"/g, '')}`
+        "Authorization": `Bearer ${localStorage.getItem('tokenUser')}`
       }
     }).then((response) => {
       toast.success('Produto cadastrado com sucesso', {
@@ -83,8 +82,6 @@ const CadastrarProduto = () => {
         position: "top-right"
       });
     }).catch((error) => {
-      console.log(error.response.data);
-
       const e = error.response.data.errors;
 
       Object.keys(e).map(i => {
@@ -120,8 +117,7 @@ const CadastrarProduto = () => {
     setFiles(files.filter(file => file.path !== path));
   };
 
-  console.log(dadosProduto);
-
+  
   return (
     <>
       <PageHeader title="Cadastra produto" className="mb-3"> </PageHeader>
@@ -263,7 +259,7 @@ const CadastrarProduto = () => {
 
           <Form.Group className="mb-3">
             <Form.Label>Descrição do produto</Form.Label>
-            <TinymceEditor onChange={handleChange} id="edit" height="13.438rem" />
+            <TinymceEditor height="13.438rem" />
           </Form.Group>
 
           <Form.Group className="mb-3">

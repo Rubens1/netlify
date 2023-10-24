@@ -12,9 +12,7 @@ const GreetingsDateInput = forwardRef(({ value, onClick }, ref) => (
       onClick={onClick}
       value={value}
       className="ps-4"
-      onChange={e => {
-        console.log({ e });
-      }}
+      
     />
     <FontAwesomeIcon
       icon="calendar-alt"

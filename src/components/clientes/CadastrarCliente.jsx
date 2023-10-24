@@ -10,14 +10,16 @@ import { IMaskInput } from "react-imask";
 import { FormContext } from 'context/Context';
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-
+import CpfCnpj from 'components/common/CpfCnpj';
 const CadastraCliente = () => {
     const navigate = useNavigate();
     const [tipoDeCadastro, setTipoDeCadastro] = useState();
     const [dadosFormulario, setDadosFormulario] = useState([]);
-    const [passo, setPasso] = useState("dados_pessoais")
+    const [passo, setPasso] = useState("dados_pessoais");
+    const [mascara, setMascara] = useState();
+    const [cpfCnpj, setCpfCnpj] = useState("");
+    const [mask, setMask] = useState("");
 
-    console.log(tipoDeCadastro);
     const handleChange = (e) => {
         e.preventDefault();
 
@@ -53,7 +55,6 @@ const CadastraCliente = () => {
 
         axios.post(`${process.env.REACT_APP_API_URL}pessoa-cadastro`, dadosFormulario)
             .then(response => {
-                console.log(response);
                 localStorage.setItem("user_id", response.data.pessoa.id);
 
                 toast.success("Usúario criado com suscesso", {
@@ -64,8 +65,6 @@ const CadastraCliente = () => {
                 return navigate("/cadastrar-endereco")
             })
             .catch(error => {
-                console.log(error);
-
                 const e = error.response.data.errors;
 
                 Object.keys(e).map(i => {
@@ -77,10 +76,22 @@ const CadastraCliente = () => {
             })
     }
 
-    const clickTipo = (e) => {
-        setTipoDeCadastro(e.value)
-    }
+    useEffect(() => {
+        if (mask == true) {
+            setTipoDeCadastro("PF")
+            setDadosFormulario(dadosFormulario => ({
+                ...dadosFormulario,
+                tipo: "PF"
+            }))
+        } else if (mask == false) {
+            setTipoDeCadastro("PJ")
+            setDadosFormulario(dadosFormulario => ({
+                ...dadosFormulario,
+                tipo: "PJ"
+            }))
+        }
 
+    }, [mask])
     return (
         <div id="user_container">
             <PageHeader title="Cadastro de cliente" className="mb-3"> </PageHeader>
@@ -88,43 +99,20 @@ const CadastraCliente = () => {
                 <Form onSubmit={handleSubmit}>
                     <Form.Group>
                         <Row>
-                            <Col xs={6}>
-                                <Form.Select id="tipo" onChange={handleChange} aria-label="Tipo de cadastro" onClick={(e) => clickTipo(e.target)}>
-                                    <option value="" >
-                                        Selecione o tipo de cadastro
 
-                                    </option>
-                                    <option value="PF">CPF</option>
-                                    <option value="PJ">CNPJ</option>
-                                </Form.Select>
-                            </Col>
                             <Col xs={6}>
                                 <Form.Group
                                     className="mb-3"
                                 >
-                                    {tipoDeCadastro == "PF" &&
-                                        <Form.Control
-                                            onChange={handleChange}
-                                            as={IMaskInput}
-                                            mask="000.000.000-00"
-                                            id="cpfcnpj"
-                                            name="cpfcnpj"
-                                            type="text"
-                                            placeholder='Digite o cpf'
-                                        />
-                                    }
-                                    {tipoDeCadastro == "PJ" &&
-                                        <Form.Control
-                                            onChange={handleChange}
-                                            as={IMaskInput}
-                                            mask="00.000.000/000-00"
-                                            id="cpfcnpj"
-                                            name="cpfcnpj"
-                                            type="text"
-                                            placeholder='Digite o CNPJ'
-                                            required
-                                        />
-                                    }
+                                    <CpfCnpj
+                                        placeholder="Digite o CPF ou CNPJ"
+                                        className="form-control"
+                                        value={cpfCnpj}
+                                        onChange={(event, type) => {
+                                            setCpfCnpj(event.target.value);
+                                            setMask(type === "CPF");
+                                        }}
+                                    />
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -203,7 +191,7 @@ const CadastraCliente = () => {
                             </Col>
                         </Row>
                     </Form.Group>
-                    {tipoDeCadastro == "cpf" ?
+                    {tipoDeCadastro == "PF" &&
                         <>
                             <Form.Group>
                                 <Row>
@@ -278,7 +266,9 @@ const CadastraCliente = () => {
                                 </Row>
                             </Form.Group>
                         </>
-                        : <>
+                    }
+                    {tipoDeCadastro == "PJ" &&
+                        <>
                             <Form.Group>
                                 <Row>
                                     <Col xs={6}>
@@ -292,7 +282,6 @@ const CadastraCliente = () => {
                                 </Row>
                             </Form.Group>
                         </>
-
                     }
                     <Form.Group>
                         <Row className='mb-4'>

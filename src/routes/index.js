@@ -2,17 +2,13 @@ import React, { useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import ErrorLayout from '../layouts/ErrorLayout';
-import Landing from 'components/pages/landing/Landing';
-
-import EmailDetail from 'components/app/email/email-detail/EmailDetail';
-import Inbox from 'components/app/email/inbox/Inbox';
 
 import Error404 from 'components/errors/Error404';
 import Error500 from 'components/errors/Error500';
 
 import Dashboard from 'components/dashboards/default';
 
-import ListaProdutos from 'components/produtos/lista';
+import ListaProdutos from 'components/produtos/ListaProdutos';
 import CadastrarProduto from 'components/produtos/CadastrarProduto';
 import LoginPainel from 'login';
 import Kanban from 'components/app/kanban/Kanban';
@@ -41,9 +37,18 @@ import CadastrarEndereco from 'components/clientes/CadastrarEndereco';
 import axios from 'axios';
 
 const FalconRoutes = () => {
-  const [token, setToken] = useState(false)
   const [userId, setUserId] = useState(false)
 
+  useEffect(() => {
+    const id = localStorage.getItem("user_id");
+
+    if (id) {
+      setUserId(true);
+    }
+
+    refreshToken()
+
+  }, [])
   const refreshToken = async () => {
     if (localStorage.getItem("tokenUser")) {
       setInterval(() => {
@@ -59,25 +64,8 @@ const FalconRoutes = () => {
       }, 1000 * 60 * 60 * 2) //Duas Horas
     }
   }
-
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem("tokenUser");
-    const id = localStorage.getItem("user_id");
-
-    refreshToken()
-
-    if (id) {
-      setUserId(true);
-    }
-    if (!isAuthenticated) {
-      setToken(true)
-    }
-
-  }, [])
-
   return (
     <Routes>
-      <Route path="landing" element={<Landing />} />
       <Route element={<ErrorLayout />}>
         <Route path="errors/404" element={<Error404 />} />
         <Route path="errors/500" element={<Error500 />} />
@@ -95,8 +83,7 @@ const FalconRoutes = () => {
         element={<SimpleForgetPassword />}
       />
       {/* //--- MainLayout Starts  */}
-
-      <Route element={token ? (<Navigate to="login" replace />) : (<MainLayout />)}>
+      <Route element={!localStorage.getItem("tokenUser") ? (<LoginPainel />) : (<MainLayout />)}>
         {/*Dashboard*/}
         <Route path="/" element={<Dashboard />} />
 

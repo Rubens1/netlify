@@ -5,17 +5,17 @@ import classNames from 'classnames';
 import NavbarTop from 'components/navbar/top/NavbarTop';
 import NavbarVertical from 'components/navbar/vertical/NavbarVertical';
 import CourseProvider from 'components/app/e-learning/CourseProvider';
-
 const MainLayout = () => {
   const { hash, pathname } = useLocation();
   const isKanban = pathname.includes('kanban');
-  // const isChat = pathname.includes('chat');
 
+  // const isChat = pathname.includes('chat');
   const {
     config: { isFluid, navbarPosition }
   } = useContext(AppContext);
-
+  
   useEffect(() => {
+    
     setTimeout(() => {
       if (hash) {
         const id = hash.replace('#', '');

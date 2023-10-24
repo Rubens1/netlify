@@ -20,7 +20,7 @@ const TinymceEditor = ({ value, handleChange, height = '50vh', isInvalid }) => {
   }, [isDark]);
 
   return (
-    <div  className={classNames({ 'is-invalid': isInvalid })}>
+    <div className={classNames({ 'is-invalid': isInvalid })}>
       <Editor
         onInit={(evt, editor) => (editorRef.current = editor)}
         value={value}
@@ -28,7 +28,7 @@ const TinymceEditor = ({ value, handleChange, height = '50vh', isInvalid }) => {
         apiKey={process.env.REACT_APP_TINYMCE_APIKEY}
         init={{
           height,
-          body_class: 'text_area',
+          body_class: 'my_class',
           menubar: false,
           content_style: `body { color: ${getColor('black')} }`,
           statusbar: false,

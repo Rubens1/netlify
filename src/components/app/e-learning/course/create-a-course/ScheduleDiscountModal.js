@@ -39,7 +39,6 @@ const ScheduleDiscountModal = ({
     });
   };
   const onSubmit = data => {
-    console.log(data);
     const keys = Object.keys(data);
     for (const key of keys) {
       submittedValues[key] = '';

@@ -13,40 +13,22 @@ import { useNavigate } from "react-router-dom";
 
 const CadastrarEndereco = ({ props }) => {
     const navigate = useNavigate();
-    const [cep, setCep] = useState();
-
     let pessoa_id = { "id_pessoa": localStorage.getItem("user_id") }
     const [dadosFormulario, setDadosFormulario] = useState(dadosFormulario => ({
         ...pessoa_id
     }));
 
-    console.log(dadosFormulario);
+    useEffect(() => {
+        const cep = document.getElementById("cep");
 
-    const handleCep = (e) => {
-        const cep = e.target.value;
+        cep.addEventListener("focusout", () => {
+            if (cep.value == null || !cep.value || cep.value.length < 9) {
+                alert("Cep invalído")
+                return 0;
+            }
 
-        if (cep.length < 9) {
-            document.getElementById("logradouro").value = "";
-            document.getElementById("bairro").value = "";
-            document.getElementById("cidade").value = "";
-            document.getElementById("estado").value = "";
-        }
-
-        if (cep.length == 9) {
-
-            axios.get(`https://viacep.com.br/ws/${cep}/json/`)
+            axios.get(`https://viacep.com.br/ws/${cep.value}/json/`)
                 .then(response => {
-                    console.log(response.data)
-                    if (Boolean(response.data.erro) == true) {
-                        setDadosFormulario('')
-                        toast.error("Cep invalído", {
-                            theme: 'colored',
-                            position: "top-right"
-                        });
-
-                        return 0;
-                    }
-
                     document.getElementById("logradouro").value = response.data.logradouro ?? null;
                     document.getElementById("bairro").value = response.data.bairro ?? null;
                     document.getElementById("cidade").value = response.data.localidade ?? null;
@@ -61,16 +43,15 @@ const CadastrarEndereco = ({ props }) => {
                         estado: response.data.uf
                     } : null)
                 });
-        }
-    }
+        });
+
+    }, [])
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post(`${process.env.REACT_APP_API_URL}cadastrar-endereco-cliente`, dadosFormulario)
+        axios.post(`${process.env.REACT_APP_API_URL}cadastrar-endereco`, dadosFormulario)
             .then(response => {
-                console.log(response);
-
                 toast.success("Endereço criado com suscesso", {
                     theme: 'colored',
                     position: "top-right"
@@ -83,7 +64,7 @@ const CadastrarEndereco = ({ props }) => {
                 const e = error.response.data.errors;
 
                 localStorage.removeItem("user_id");
-
+                
                 Object.keys(e).map(i => {
                     toast.error(e[`${i}`][0], {
                         theme: 'colored',
@@ -120,7 +101,7 @@ const CadastrarEndereco = ({ props }) => {
                                     CEP:
                                 </Form.Label>
                                 <Form.Control
-                                    onChange={handleCep}
+                                    onChange={handleChange}
                                     id="cep"
                                     as={IMaskInput}
                                     type='text'
@@ -157,7 +138,7 @@ const CadastrarEndereco = ({ props }) => {
                                     id="logradouro"
                                     name="logradouro"
                                     type="text"
-                                />
+                                    />
                             </Col>
                             <Col xs={5}>
                                 <Form.Label>Complemento:</Form.Label>
@@ -166,7 +147,7 @@ const CadastrarEndereco = ({ props }) => {
                                     id="complemento"
                                     name="complemento"
                                     type="text"
-                                />
+                                     />
                             </Col>
                         </Row>
                     </Form.Group>
@@ -182,7 +163,7 @@ const CadastrarEndereco = ({ props }) => {
                                         id="bairro"
                                         as={IMaskInput}
                                         type='text'
-                                    />
+                                        />
                                 </Form.Group>
                             </Col>
                             <Col xs={6}>
@@ -193,7 +174,7 @@ const CadastrarEndereco = ({ props }) => {
                                         onChange={handleChange}
                                         id="cidade"
                                         type='text'
-                                    />
+                                         />
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -203,7 +184,7 @@ const CadastrarEndereco = ({ props }) => {
                         <Row className='mb-4'>
                             <Col xs={2} >
                                 <Form.Group aria-label="Tipo de cadastro">
-                                    <Form.Label>Estado:</Form.Label>
+                                    <Form.Label>estado:</Form.Label>
                                     <Form.Control
                                         style={{
                                             width: "80px"
@@ -250,7 +231,7 @@ const CadastrarEndereco = ({ props }) => {
                                     <Form.Label>Identificação:</Form.Label>
                                     <Form.Control
                                         onChange={handleChange}
-                                        id="identificacao"
+                                        id="nome"
                                         type='text'
                                     />
 
