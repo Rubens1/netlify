@@ -11,10 +11,11 @@ const ColaboradoresInfo = () => {
     const [permicao, setPermicao] = useState()
 
     const organizerOptions = [
-        { value: '1', label: 'Cliente' },
-        { value: '2', label: 'Categoria' },
-        { value: '3', label: 'Pedidos' },
-        { value: '4', label: 'Produto' }
+        { value: '1', label: 'Todos' },
+        { value: '2', label: 'Cliente' },
+        { value: '3', label: 'Categoria' },
+        { value: '4', label: 'Pedidos' },
+        { value: '5', label: 'Produto' }
     ];
 
     const cadastro = async (e) => {
@@ -22,7 +23,7 @@ const ColaboradoresInfo = () => {
         let nome = e.target.nome.value;
         let email = e.target.email.value;
         let senha = e.target.senha.value;
-                         
+
         const sessaoDados = selecao.map((item) => {        
         return item.label;
         
@@ -92,7 +93,7 @@ const ColaboradoresInfo = () => {
                         <Form.Label>Permissões</Form.Label>
                         <Select
                             name="permicoes"
-                            closeMenuOnSelect={false}
+                            /* closeMenuOnSelect={false} */
                             options={organizerOptions}
                             placeholder='Selecione...'
                             isMulti
@@ -101,47 +102,7 @@ const ColaboradoresInfo = () => {
                             onChange={value => setSelecao(value)}
                         />
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Row>
-                            <Col sm={6}>
-                                <Form.Label>Todos(as)</Form.Label>
-                            </Col>
-                            <Col sm={6}>
-                                <Form.Check
-                                    inline
-                                    type='checkbox'
-                                    id='item1CheckListaTodos'
-                                    label="Lista"
-                                    name="lista"
-                                    value="todos"
-                                />
-                                <Form.Check
-                                    inline
-                                    type='checkbox'
-                                    id='item1CheckCadastrarTodos'
-                                    label="Cadastrar"
-                                    name="cadastrar"
-                                    value="todos"
-                                />
-                                <Form.Check
-                                    inline
-                                    type='checkbox'
-                                    id='item1CheckEditarTodos'
-                                    label="Editar"
-                                    name="editar"
-                                    value="todos"
-                                />
-                                <Form.Check
-                                    inline
-                                    type='checkbox'
-                                    id='item1CheckDeletarTodos'
-                                    label="Deletar"
-                                    name="deletar"
-                                    value="todos"
-                                />
-                            </Col>
-                        </Row>
-                    </Form.Group>
+                    
                     {selecao && selecao.map((item, key) => {
                         const itemId = item.value;
                         return (<div key={item.value}>
